@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html><head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Block大小对F2FS的影响 - RollBack?</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="初略计算Block及node size对F2FS元数据和文件索引所占空间的影响。" />
+	<meta property="og:image" content=""/>
+	<meta property="og:title" content="Block大小对F2FS的影响" />
+<meta property="og:description" content="初略计算Block及node size对F2FS元数据和文件索引所占空间的影响。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://example.org/posts/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-09-30T14:52:05+08:00" />
+<meta property="article:modified_time" content="2022-09-30T14:52:05+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Block大小对F2FS的影响"/>
+<meta name="twitter:description" content="初略计算Block及node size对F2FS元数据和文件索引所占空间的影响。"/>
+<script src="http://example.org/js/feather.min.js"></script>
+	
+	
+        <link href="http://example.org/css/fonts.2c2227b81b1970a03e760aa2e6121cd01f87c88586803cbb282aa224720a765f.css" rel="stylesheet">
+	
+
+	
+	<link rel="stylesheet" type="text/css" media="screen" href="http://example.org/css/main.cc5da3e5eedafd739b2cfb6b719b396de16277d09b8253a51f120d6729675cf8.css" />
+	
+	
+</head>
+<body>
+        <div class="content"><header>
+	<div class="main">
+		<a href="http://example.org/">RollBack?</a>
+	</div>
+	<nav>
+		
+		<a href="/">Home</a>
+		
+		<a href="/posts">All posts</a>
+		
+		<a href="/about">About</a>
+		
+		<a href="/tags">Tags</a>
+		
+		
+	</nav>
+</header>
+
+<main>
+	<article>
+		<div class="title">
+			<h1 class="title">Block大小对F2FS的影响</h1>
+			<div class="meta">Posted on Sep 30, 2022</div>
+		</div>
+		
+
+		<section class="body">
+			<h2 id="block大小对f2fs的影响">Block大小对F2FS的影响</h2>
+<blockquote>
+<p>初略计算了当block大小分别为4KB（原生F2FS，记为<code>F2FS-4KB</code>）和64KB（记为<code>F2FS-64KB</code>）时，F2FS的各个元数据区域以及文件会有什么区别。</p>
+</blockquote>
+<p>F2FS的<code>segment</code>大小固定为2MB，所以block大小为4KB时，一个<code>segment</code>包含512个block；block为64KB时，一个<code>segment</code>包含32个block。</p>
+<h3 id="元数据区域1tb闪存">元数据区域（1TB闪存）</h3>
+<p>F2FS的物理布局如下图所示：</p>
+<p><img src="https://blog-image-hugo.oss-cn-hangzhou.aliyuncs.com/f2fs-layout.png" alt="img"></p>
+<h4 id="super-block">Super Block</h4>
+<p>SB区域只包含了两个<code>struct f2fs_super_block</code>，存储在两个<code>block</code>中，但因为Check Point区域需要<code>segment</code>对齐，所以SB区域要占据一个<code>segment</code>，大小为<strong>2MB</strong>，<code>F2FS-4KB</code>和<code>F2FS-64KB</code>都相同。</p>
+<h4 id="check-point">Check Point</h4>
+<p>CP区域和SB区域类似，其结构如下图，主要保存了两个Check Point来保持数据一致性，每个Check Point占据一个<code>segment</code>，所以CP区域需要占据2个<code>segment</code>，大小为<strong>4MB</strong>，<code>F2FS-4KB</code>和<code>F2FS-64KB</code>都相同。</p>
+<p><img src="https://blog-image-hugo.oss-cn-hangzhou.aliyuncs.com/image-20220918234557375.png" alt="image-20220918234557375"></p>
+<h4 id="sit">SIT</h4>
+<p>SIT区域存在两份副本，其中一个表示最新的数据，f2fs通过保存在cp中的sit_nat_version_bitmap字段来指示哪个才是最新的。其物理区域实际构成如下图：</p>
+<p><img src="https://blog-image-hugo.oss-cn-hangzhou.aliyuncs.com/image-20220919090522872.png" alt="image-20220919090522872"></p>
+<p>SIT主要由<code>struct f2fs_sit_block</code>来存储段信息，其结构如下：</p>
+<p><img src="https://blog-image-hugo.oss-cn-hangzhou.aliyuncs.com/image-20220919091220894.png" alt="image-20220919091220894"></p>
+<p>其中一个<code>f2fs_sit_entry</code>表示一个<code>segment</code>，由于<code>segment</code>大小固定为2MB，且闪存大小为1TB，所以F2FS-4KB 与F2FS-64KB拥有一样多的<code>segment</code>，不同之处在于<code>segment</code>内的block数，且block size不同，所以会导致<code>valid_map</code>字段占用的字节数不同，从而导致SIT区域占用大小不同。</p>
+<p>经过计算，<code>F2FS-4KB</code>的SIT需要占用38个<code>segment</code>，即<strong>76MB</strong>；<code>F2FS-64KB</code>的SIT需要占用8个<code>segment</code>，即<strong>16MB</strong>；</p>
+<h4 id="nat">NAT</h4>
+<p>NAT的实际磁盘布局如下图，NAT按照<code>segment</code>为单位进行备份，前一个segment的备份紧跟在其后 面，每个<code>segment</code>包含多个<code>f2fs_nat_block</code>，而每个<code>f2fs_nat_block</code>包含多个个<code>f2fs_nat_entry</code>。每个<code> f2fs_nat_entry</code>描述一个node块及其块地址的信息。</p>
+<p><img src="https://blog-image-hugo.oss-cn-hangzhou.aliyuncs.com/image-20220919105936538.png" alt="image-20220919105936538"></p>
+<p>当node大小为4KB时，对于1TB大小的闪存，最多含有1TB/4KB=2^28个node。</p>
+<p>对于<code>F2FS-4KB</code>，一个<code>segment</code>可以存储512*455=232960个node，所以需要2^28/232960=1153个<code>segment</code>，由于还要存储一份副本，所以一 共需要1153*2=2306个<code>segment</code>，大小为2236*2=<strong>4612MB</strong>。</p>
+<p>对于<code>F2FS-64KB</code>，一个<code>segment</code>可以描述 32*6553=209696个node，所以需要2^28/209696=1281个<code>segment</code>，由于还要存储一份副本，所以一 共需要1281*2=2562个<code>segment</code>，大小为2562*2=<strong>5124MB</strong>。</p>
+<h4 id="ssa">SSA</h4>
+<p>SSA主要用于物理地址与逻辑地址的转换，其物理结构如下图，</p>
+<p><img src="https://blog-image-hugo.oss-cn-hangzhou.aliyuncs.com/image-20220919113832380.png" alt="image-20220919113832380"></p>
+<p>其中一个f2fs_summary_block可以用于一个segment的地址转换，1TB闪存拥有(1TB/2MB)-1=2^19-1个segment，减一是因为SB区域占据了一个segment，且该segment不参与编号。</p>
+<p>对于<code>F2FS-4KB</code>，一共需要(2^19)-1个<code>f2fs_summary_block</code>，即((2^19)-1)/512=1024个<code>segemnt</code>，大小为 1024*2MB=<strong>2048MB</strong>。</p>
+<p>对于<code>F2FS-64KB</code>，同样需要(2^19)-1个<code>f2fs_summary_block</code>，但由于一个<code>f2fs_summary_block</code>只包含了32个<code>f2fs_summary</code>，大小发生了变化，所以变成了需要要((2^19)-1)/89=5891个block，即185个 <code>segment</code>，大小为185*2MB=<strong>370MB</strong>。</p>
+<blockquote>
+<p>综上，<code>F2FS-4KB</code>的元数据区域一共占用了2+4+76+4612+2048=<strong>6742MB</strong>，约占总 存储空间大小的<strong>0.64%</strong>(6742MB/1TB*100%)。</p>
+<p>而<code>F2FS-64KB</code>的元数据区域一共占用2+4+16+5124+370=5516MB，约占总存储 空间大小的<strong>0.52%</strong>(5516MB/1TB*100%)。</p>
+</blockquote>
+<h3 id="文件索引1gb大小">文件索引（1GB大小）</h3>
+<p>对于一个1GB的文件的索引所占闪存大小，主要对比以下三种情形：block大小为4KB（记为<code>F2FS-4KB</code>）、block大小为64KB，node大小为4KB（记为<code>F2FS-64KB-4KB</code>)、block大小为64KB，node大小为64KB（记为<code>F2FS-64KB-64KB</code>)。</p>
+<p>F2FS用一个inode表示一个文件，inode的结构如下如图：</p>
+<!-- raw HTML omitted -->
+<p>可以看到inode是一个类似多级索引的结构，一般情况下block用于存储文件的数据，node存储文件的索引。下面分析三种情形下1GB文件的索引大小有什么区别。</p>
+<h4 id="f2fs-4kb">F2FS-4KB</h4>
+<p>这种情形下，node和block大小为4KB，一个inode可以存储923个block地址（即图中的i_addr）、5个node的nid（2个direct_node，2个indirect_node，1个double_indirect_node），一个node可以存储1018个nid。根据这个信息可以计算出一个inode在使用不同区域时能索引多大的文件：</p>
+<ul>
+<li>对于特别小的文件，如果将其数据用block保存，就会浪费block空间，所以F2FS可以使用<strong>inline data</strong>来存储小文件，即使用i_addr区域来直接存储数据，而不是存储block地址，这种情况下i_addr最多可以存储4B（block地址占4B）*923=3692B=<strong>3.6KB</strong>的数据；</li>
+<li>仅使用i_addr，可以索引923*4KB=3692KB=<strong>3.6MB</strong>大小的文件；</li>
+<li>使用i_addr与direct_node，可以索引923*4KB+2*1018*4KB=<strong>11.55MB</strong>大小的文件；</li>
+<li>使用i_addr、direct_node与indirect_node，可以索引923*4KB+2*1018*4KB+2*1018*1018*4KB=<strong>7.91GB</strong>大小的文件；</li>
+<li>使用i_addr、direct_node、indirect_node与double_indirect_node，可以索引923*4KB+2*1018*4KB+2*1018*1018*4KB+1*1018*1018*1018*4KB=<strong>3.93TB</strong>大小的文件；</li>
+</ul>
+<p>所以1GB大小的文件，需要用到i_addr、direct_node与indirect_node。下面计算具体需要几个node来存储索引。</p>
+<p>如果仅使用i_addr与direct_node，可以索引923*4KB+2*1018*4KB=<strong>11836KB</strong>大小的文件，剩余1*1024*1024*1024KB-11836KB=1036740KB，一个direct node可以索引的文件大小为1018*4KB=4072KB，所以需要1036740/4072=254.6个direct node，所以只需要一个indirect node即可。</p>
+<p>综上，可以计算得到，在<code>F2FS-4KB</code>中，一个1GB文件的索引大小为：</p>
+<p><strong>1*4KB(inode)+2*4KB(direct node)+1*4KB(single indirect node)+255*4KB(direct node)=1036KB。</strong></p>
+<h4 id="f2fs-64kb-4kb">F2FS-64KB-4KB</h4>
+<p>当block变为64KB，而node大小不变时，inode基本没变，与F2FS-4KB类似。</p>
+<ul>
+<li>对于inline data，即使用i_addr区域来直接存储数据，而不是存储block地址，这种情况下i_addr最多可以存储4B*923=3692B=<strong>3.6KB</strong>的数据；</li>
+<li>仅使用i_addr，可以索引923*64KB=59072KB=<strong>57.68MB</strong>大小的文件；</li>
+<li>使用i_addr与direct_node，可以索引923*64KB+2*1018*64KB=<strong>184.93MB</strong>大小的文件；</li>
+<li>使用i_addr、direct_node与indirect_node，可以索引923*64KB+2*1018*64KB+2*1018*1018*64KB=<strong>128.68GB</strong>大小的文件；</li>
+<li>使用i_addr、direct_node、indirect_node与double_indirect_node，可以索引923*64KB+2*1018*64KB+2*1018*1018*64KB+1*1018*1018*1018*64KB=<strong>63TB</strong>大小的文件；</li>
+</ul>
+<p>由之前的计算可以得出923个i_addr+2个direct node可以索引923*64KB+2*1018*64KB=<strong>189376KB</strong>大小的文件，剩余1GB-189376KB=1*1024*1024KB-189376KB=859200KB，一个direct node可以索引的文件大小为1018*64KB=65152KB，所以需要859200/65152=13.1即14个direct node，</p>
+<p>综上，可以计算得到，在F2FS-64KB中，一个1GB文件的索引大小为：</p>
+<p><strong>1*4KB(inode)+2*4KB(direct node)+1*4KB(indirect node)+14*4KB(direct node)=72KB。</strong></p>
+<h4 id="f2fs-64kb-64kb">F2FS-64KB-64KB</h4>
+<p>当block变为64KB，node也为64KB时，node可以存储的block地址或nid变多了，inode可以存储16283个block地址和5个nid，而direct node与indirect node可以存储16378个nid。</p>
+<ul>
+<li>对于inline data，这种情况下i_addr区域最多可以存储4B*16283=65132B=<strong>63.3KB</strong>的数据；</li>
+<li>仅使用i_addr，可以索引16283*64KB=1042112KB=<strong>1017.68MB</strong>大小的文件；</li>
+<li>使用i_addr与direct_node，可以索引16283*64KB+2*16378*64KB=<strong>2.99GB</strong>大小的文件；</li>
+<li>使用i_addr、direct_node与indirect_node，可以索引16283*64KB+2*16378*64KB+2*16378*16378*64KB=<strong>31.97GB</strong>大小的文件；</li>
+<li>使用i_addr、direct_node、indirect_node与double_indirect_node，可以索引16283*64KB+2*16378*64KB+2*16378*16378*64KB+1*16378*16378*16378*64KB=<strong>261888TB</strong>大小的文件；</li>
+</ul>
+<p>由之前的计算可以得出16283个直接索引可以索引16283*64KB=<strong>1042112KB</strong>大小的文件，剩余1GB-1042112KB=1*1024*1024KB-1042112KB=6464KB，一个direct node可以索引的文件大小为16378*64KB=1048192KB&gt;6464KB，所以只需要1个direct node来索引剩下的6464KB。</p>
+<p>综上，可以计算得到，在<code>F2FS-64KB-64KB</code>中，一个1GB文件的索引大小为：</p>
+<p><strong>1*64KB(inode)+1*64KB(direct node)=128KB。</strong></p>
+
+		</section>
+
+		<div class="post-tags">
+			
+			
+			<nav class="nav tags">
+				<ul class="tags">
+					
+					<li><a href="/tags/f2fs">F2FS</a></li>
+					
+				</ul>
+			</nav>
+			
+			
+		</div>
+	</article>
+</main>
+<footer>
+  <div style="display:flex"><a class="soc" href="https://github.com/badhhui" title="GitHub"><i data-feather="github"></i></a>
+    <a class="border"></a></div>
+  <div class="footer-info">
+    2022  © RollBack |  <a
+      href="https://github.com/athul/archie">Archie Theme</a> | Built with <a href="https://gohugo.io">Hugo</a>
+  </div>
+</footer>
+
+
+<script>
+  feather.replace()
+</script></div>
+    </body>
+</html>

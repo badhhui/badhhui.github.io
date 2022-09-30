@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>RollBack?</title>
+    <link>http://example.org/</link>
+    <description>Recent content on RollBack?</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>© RollBack</copyright>
+    <lastBuildDate>Fri, 30 Sep 2022 15:04:21 +0800</lastBuildDate><atom:link href="http://example.org/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>F2FS</title>
+      <link>http://example.org/posts/f2fs/</link>
+      <pubDate>Fri, 30 Sep 2022 15:04:21 +0800</pubDate>
+      
+      <guid>http://example.org/posts/f2fs/</guid>
+      <description>Abstract F2FS是一个Linux文件系统，适用于闪存设备，论文的实验结果表明F2FS要比EXT4的性能好很多。
+1. Introduction 闪存的使用很广泛，服务器系统也开始使用闪存。但是闪存有几个局限性：需要先擦后写、需要按顺序写入被擦除的块、每个擦除块的写入周期有限。
+随着存储需求的增长，多个闪存芯片通过一个专门的控制器连接。在控制器上运行的固件，通常称为FTL（闪存转换层），可以解决NAND闪存的限制，并且提供一个通用的块设备抽象。
+闪存在某些条件下，例如对固态硬盘的频繁随机写入会引起底层介质的内部碎片，并降低固态硬盘的持续性能。但是随机写入是非常普遍的，甚至已经成为了一种负担，例如FaceBook随机写入比顺序写入多150%，WebBench随机写入比顺序写入多80%。频繁的随机写入和刷新操作会严重增加闪存设备的I/O延迟，并降低设备的使用寿命。
+随机写入的不利影响可以通过日志结构文件系统（LFS）方法或写时复制（copy on write）来减少。传统的HDD文件系统设计策略尽管是有益的，但并没有完全利用和优化NAND闪存介质的使用。
+F2FS是第一个公开和广泛使用的文件系统，它从头开始设计，通过通用块接口优化闪存设备的性能和寿命。
+2. Design and Implementation of F2FS 2.1 On-Disk Layout F2FS 将整个卷划分为固定大小的segment。连续几个segment组成一个section，连续几个section组成一个zone。
+F2FS将整个卷分成六个区域：超级块（Super Block）、检查点（Check Point）、段落信息表（Segment Information Table）、节点地址表（Node Address Table）、段落摘要区（Segment Summary Area）、主区域（Main Area），如下图所示。
+根据以上的磁盘结构，假设要查找路径为dir/file的文件，步骤如下：
+查找NAT获得根节点所在的块； 在根节点的数据块中查找dir目录项，获得节点号； 通过NAT将节点号转换为物理地址； 获得名为dir的节点； 在dir节点中查找file目录项，重复3和4最终得到文件节点。 2.2 File Structure F2FS采用节点结构来定位更多的索引块。每个节点块都有一个唯一的节点ID，使用节点ID作为索引。节点块可分为：inode、直接节点和间接节点。inode包含了文件的元数据，直接节点包含了数据的块地址，间接节点包含了其他节点块的节点ID。
+F2FS使用基于指针的文件索引与直接和间接节点块来消除Wandering Tree问题，直接节点指向Block address，间接节点指向NAT的表项，当数据块变更后，直接节点也需要变更，但是间接节点不需要，因为间接节点不直接指向直接节点，而是指向NAT表项，如图所示，这样就避免了Wandering Tree问题。
+2.3 Directory Structure 在F2FS中，一个4KB的目录条目（dentry）块由一个位图和两个包含成对的槽和名字的数组组成。位图指示每个槽是否有效，一个槽包含了一个哈希值、inode号、文件名的长度和文件类型。一个目录文件构建一个多级哈希表来管理大量的dentry。
+当在目录中查找一个文件时，先计算出文件名的哈希值，然后遍历这个多级哈希表，在每级中扫描一个由2个或4个dentry块组成的bucket，这样就可以有log2N的时间复杂度。
+2.4 Multi-head Logging F2FS保持六个主要的日志区，从而最大限度地发挥冷热数据分离的效果。F2FS为节点和数据块定义了三个级别的温度：热、温和冷。
+如下图所示，直接节点和存放目录的数据块是热的，间接节点是冷的。
+通过清理移动的数据块、被用户标记为 &amp;ldquo;冷 &amp;ldquo;的数据块、多媒体文件数据这三种数据块被认为是冷的。
+默认情况下，F2FS激活了六个开放的写入日志，用户可以在安装时将写入流的数量调整为两个或四个，不同的数量会影响数据分离的效果。
+FTL算法根据数据和 &amp;ldquo;日志闪存块 &amp;ldquo;之间的关联性，主要分为块关联、集关联和完全关联。日志闪存块可以专门用于单个数据闪存块（块关联），用于所有数据闪存块（完全关联），或者用于一组连续的数据闪存块（集关联）。F2FS使用多头记录的方式并行写入节点和数据块，而关联式FTL会将分离的块（在文件系统层面）混合到同一个闪存块中。为了避免这种错位，F2FS将活动日志映射到不同的区域，以在FTL中分离它们。
+2.5 Cleaning 清理是一个回收分散的和无效的块的过程，一旦底层存储容量被填满，清理就会不断发生，这样就会影响F2FS的持续性能。在F2FS中，清理是以段为单位进行的。
+F2FS有前台清理和后台清理，前台清理只有在没有足够空闲部分时才会触发，而后台清理则会定期唤醒。清理过程分为三步：
+确定要清理的部分。LFS中有两个策略：贪婪（greedy）和成本效益（cost-benefit），贪婪策略选择一个有效块数最少的部分，前台清理采用贪婪策略，这种策略控制了迁移有效块的开销。后台清理采用成本效益策略，成本效益策略根据利用率和&amp;quot;年龄&amp;quot;来选择要清理的部分。
+识别和迁移有效块。在第一步中选择了一个区段后，要快速识别出这个区段的有效块，F2FS通过在SIT中为每个区段维护的有效性位图来确定所有有效块，然后从SSA信息中检索出包含其索引的父节点块，如果这些块是有效的，F2FS将它们迁移到其他空闲的日志中。
+在后台清理时，F2FS并没有实际的I/O迁移，而是把有效块加载到页面缓存，标记为脏块，让内核工作线程稍后将其刷入存储。这种延迟迁移减轻了对前台I/O活动的性能影响，而且还允许小的写操作被合并。</description>
+    </item>
+    
+    <item>
+      <title>Block大小对F2FS的影响</title>
+      <link>http://example.org/posts/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</link>
+      <pubDate>Fri, 30 Sep 2022 14:52:05 +0800</pubDate>
+      
+      <guid>http://example.org/posts/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</guid>
+      <description>Block大小对F2FS的影响 初略计算了当block大小分别为4KB（原生F2FS，记为F2FS-4KB）和64KB（记为F2FS-64KB）时，F2FS的各个元数据区域以及文件会有什么区别。
+F2FS的segment大小固定为2MB，所以block大小为4KB时，一个segment包含512个block；block为64KB时，一个segment包含32个block。
+元数据区域（1TB闪存） F2FS的物理布局如下图所示：
+Super Block SB区域只包含了两个struct f2fs_super_block，存储在两个block中，但因为Check Point区域需要segment对齐，所以SB区域要占据一个segment，大小为2MB，F2FS-4KB和F2FS-64KB都相同。
+Check Point CP区域和SB区域类似，其结构如下图，主要保存了两个Check Point来保持数据一致性，每个Check Point占据一个segment，所以CP区域需要占据2个segment，大小为4MB，F2FS-4KB和F2FS-64KB都相同。
+SIT SIT区域存在两份副本，其中一个表示最新的数据，f2fs通过保存在cp中的sit_nat_version_bitmap字段来指示哪个才是最新的。其物理区域实际构成如下图：
+SIT主要由struct f2fs_sit_block来存储段信息，其结构如下：
+其中一个f2fs_sit_entry表示一个segment，由于segment大小固定为2MB，且闪存大小为1TB，所以F2FS-4KB 与F2FS-64KB拥有一样多的segment，不同之处在于segment内的block数，且block size不同，所以会导致valid_map字段占用的字节数不同，从而导致SIT区域占用大小不同。
+经过计算，F2FS-4KB的SIT需要占用38个segment，即76MB；F2FS-64KB的SIT需要占用8个segment，即16MB；
+NAT NAT的实际磁盘布局如下图，NAT按照segment为单位进行备份，前一个segment的备份紧跟在其后 面，每个segment包含多个f2fs_nat_block，而每个f2fs_nat_block包含多个个f2fs_nat_entry。每个 f2fs_nat_entry描述一个node块及其块地址的信息。
+当node大小为4KB时，对于1TB大小的闪存，最多含有1TB/4KB=2^28个node。
+对于F2FS-4KB，一个segment可以存储512*455=232960个node，所以需要2^28/232960=1153个segment，由于还要存储一份副本，所以一 共需要1153*2=2306个segment，大小为2236*2=4612MB。
+对于F2FS-64KB，一个segment可以描述 32*6553=209696个node，所以需要2^28/209696=1281个segment，由于还要存储一份副本，所以一 共需要1281*2=2562个segment，大小为2562*2=5124MB。
+SSA SSA主要用于物理地址与逻辑地址的转换，其物理结构如下图，
+其中一个f2fs_summary_block可以用于一个segment的地址转换，1TB闪存拥有(1TB/2MB)-1=2^19-1个segment，减一是因为SB区域占据了一个segment，且该segment不参与编号。
+对于F2FS-4KB，一共需要(2^19)-1个f2fs_summary_block，即((2^19)-1)/512=1024个segemnt，大小为 1024*2MB=2048MB。
+对于F2FS-64KB，同样需要(2^19)-1个f2fs_summary_block，但由于一个f2fs_summary_block只包含了32个f2fs_summary，大小发生了变化，所以变成了需要要((2^19)-1)/89=5891个block，即185个 segment，大小为185*2MB=370MB。
+综上，F2FS-4KB的元数据区域一共占用了2+4+76+4612+2048=6742MB，约占总 存储空间大小的0.64%(6742MB/1TB*100%)。
+而F2FS-64KB的元数据区域一共占用2+4+16+5124+370=5516MB，约占总存储 空间大小的0.52%(5516MB/1TB*100%)。
+文件索引（1GB大小） 对于一个1GB的文件的索引所占闪存大小，主要对比以下三种情形：block大小为4KB（记为F2FS-4KB）、block大小为64KB，node大小为4KB（记为F2FS-64KB-4KB)、block大小为64KB，node大小为64KB（记为F2FS-64KB-64KB)。
+F2FS用一个inode表示一个文件，inode的结构如下如图：
+可以看到inode是一个类似多级索引的结构，一般情况下block用于存储文件的数据，node存储文件的索引。下面分析三种情形下1GB文件的索引大小有什么区别。
+F2FS-4KB 这种情形下，node和block大小为4KB，一个inode可以存储923个block地址（即图中的i_addr）、5个node的nid（2个direct_node，2个indirect_node，1个double_indirect_node），一个node可以存储1018个nid。根据这个信息可以计算出一个inode在使用不同区域时能索引多大的文件：
+对于特别小的文件，如果将其数据用block保存，就会浪费block空间，所以F2FS可以使用inline data来存储小文件，即使用i_addr区域来直接存储数据，而不是存储block地址，这种情况下i_addr最多可以存储4B（block地址占4B）*923=3692B=3.6KB的数据； 仅使用i_addr，可以索引923*4KB=3692KB=3.6MB大小的文件； 使用i_addr与direct_node，可以索引923*4KB+2*1018*4KB=11.55MB大小的文件； 使用i_addr、direct_node与indirect_node，可以索引923*4KB+2*1018*4KB+2*1018*1018*4KB=7.91GB大小的文件； 使用i_addr、direct_node、indirect_node与double_indirect_node，可以索引923*4KB+2*1018*4KB+2*1018*1018*4KB+1*1018*1018*1018*4KB=3.93TB大小的文件； 所以1GB大小的文件，需要用到i_addr、direct_node与indirect_node。下面计算具体需要几个node来存储索引。
+如果仅使用i_addr与direct_node，可以索引923*4KB+2*1018*4KB=11836KB大小的文件，剩余1*1024*1024*1024KB-11836KB=1036740KB，一个direct node可以索引的文件大小为1018*4KB=4072KB，所以需要1036740/4072=254.6个direct node，所以只需要一个indirect node即可。
+综上，可以计算得到，在F2FS-4KB中，一个1GB文件的索引大小为：
+1*4KB(inode)+2*4KB(direct node)+1*4KB(single indirect node)+255*4KB(direct node)=1036KB。
+F2FS-64KB-4KB 当block变为64KB，而node大小不变时，inode基本没变，与F2FS-4KB类似。
+对于inline data，即使用i_addr区域来直接存储数据，而不是存储block地址，这种情况下i_addr最多可以存储4B*923=3692B=3.</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>学习笔记 on RollBack?</title>
+    <link>http://example.org/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</link>
+    <description>Recent content in 学习笔记 on RollBack?</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>© RollBack</copyright>
+    <lastBuildDate>Fri, 30 Sep 2022 14:52:05 +0800</lastBuildDate><atom:link href="http://example.org/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Block大小对F2FS的影响</title>
+      <link>http://example.org/posts/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</link>
+      <pubDate>Fri, 30 Sep 2022 14:52:05 +0800</pubDate>
+      
+      <guid>http://example.org/posts/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</guid>
+      <description>Block大小对F2FS的影响 初略计算了当block大小分别为4KB（原生F2FS，记为F2FS-4KB）和64KB（记为F2FS-64KB）时，F2FS的各个元数据区域以及文件会有什么区别。
+F2FS的segment大小固定为2MB，所以block大小为4KB时，一个segment包含512个block；block为64KB时，一个segment包含32个block。
+元数据区域（1TB闪存） F2FS的物理布局如下图所示：
+Super Block SB区域只包含了两个struct f2fs_super_block，存储在两个block中，但因为Check Point区域需要segment对齐，所以SB区域要占据一个segment，大小为2MB，F2FS-4KB和F2FS-64KB都相同。
+Check Point CP区域和SB区域类似，其结构如下图，主要保存了两个Check Point来保持数据一致性，每个Check Point占据一个segment，所以CP区域需要占据2个segment，大小为4MB，F2FS-4KB和F2FS-64KB都相同。
+SIT SIT区域存在两份副本，其中一个表示最新的数据，f2fs通过保存在cp中的sit_nat_version_bitmap字段来指示哪个才是最新的。其物理区域实际构成如下图：
+SIT主要由struct f2fs_sit_block来存储段信息，其结构如下：
+其中一个f2fs_sit_entry表示一个segment，由于segment大小固定为2MB，且闪存大小为1TB，所以F2FS-4KB 与F2FS-64KB拥有一样多的segment，不同之处在于segment内的block数，且block size不同，所以会导致valid_map字段占用的字节数不同，从而导致SIT区域占用大小不同。
+经过计算，F2FS-4KB的SIT需要占用38个segment，即76MB；F2FS-64KB的SIT需要占用8个segment，即16MB；
+NAT NAT的实际磁盘布局如下图，NAT按照segment为单位进行备份，前一个segment的备份紧跟在其后 面，每个segment包含多个f2fs_nat_block，而每个f2fs_nat_block包含多个个f2fs_nat_entry。每个 f2fs_nat_entry描述一个node块及其块地址的信息。
+当node大小为4KB时，对于1TB大小的闪存，最多含有1TB/4KB=2^28个node。
+对于F2FS-4KB，一个segment可以存储512*455=232960个node，所以需要2^28/232960=1153个segment，由于还要存储一份副本，所以一 共需要1153*2=2306个segment，大小为2236*2=4612MB。
+对于F2FS-64KB，一个segment可以描述 32*6553=209696个node，所以需要2^28/209696=1281个segment，由于还要存储一份副本，所以一 共需要1281*2=2562个segment，大小为2562*2=5124MB。
+SSA SSA主要用于物理地址与逻辑地址的转换，其物理结构如下图，
+其中一个f2fs_summary_block可以用于一个segment的地址转换，1TB闪存拥有(1TB/2MB)-1=2^19-1个segment，减一是因为SB区域占据了一个segment，且该segment不参与编号。
+对于F2FS-4KB，一共需要(2^19)-1个f2fs_summary_block，即((2^19)-1)/512=1024个segemnt，大小为 1024*2MB=2048MB。
+对于F2FS-64KB，同样需要(2^19)-1个f2fs_summary_block，但由于一个f2fs_summary_block只包含了32个f2fs_summary，大小发生了变化，所以变成了需要要((2^19)-1)/89=5891个block，即185个 segment，大小为185*2MB=370MB。
+综上，F2FS-4KB的元数据区域一共占用了2+4+76+4612+2048=6742MB，约占总 存储空间大小的0.64%(6742MB/1TB*100%)。
+而F2FS-64KB的元数据区域一共占用2+4+16+5124+370=5516MB，约占总存储 空间大小的0.52%(5516MB/1TB*100%)。
+文件索引（1GB大小） 对于一个1GB的文件的索引所占闪存大小，主要对比以下三种情形：block大小为4KB（记为F2FS-4KB）、block大小为64KB，node大小为4KB（记为F2FS-64KB-4KB)、block大小为64KB，node大小为64KB（记为F2FS-64KB-64KB)。
+F2FS用一个inode表示一个文件，inode的结构如下如图：
+可以看到inode是一个类似多级索引的结构，一般情况下block用于存储文件的数据，node存储文件的索引。下面分析三种情形下1GB文件的索引大小有什么区别。
+F2FS-4KB 这种情形下，node和block大小为4KB，一个inode可以存储923个block地址（即图中的i_addr）、5个node的nid（2个direct_node，2个indirect_node，1个double_indirect_node），一个node可以存储1018个nid。根据这个信息可以计算出一个inode在使用不同区域时能索引多大的文件：
+对于特别小的文件，如果将其数据用block保存，就会浪费block空间，所以F2FS可以使用inline data来存储小文件，即使用i_addr区域来直接存储数据，而不是存储block地址，这种情况下i_addr最多可以存储4B（block地址占4B）*923=3692B=3.6KB的数据； 仅使用i_addr，可以索引923*4KB=3692KB=3.6MB大小的文件； 使用i_addr与direct_node，可以索引923*4KB+2*1018*4KB=11.55MB大小的文件； 使用i_addr、direct_node与indirect_node，可以索引923*4KB+2*1018*4KB+2*1018*1018*4KB=7.91GB大小的文件； 使用i_addr、direct_node、indirect_node与double_indirect_node，可以索引923*4KB+2*1018*4KB+2*1018*1018*4KB+1*1018*1018*1018*4KB=3.93TB大小的文件； 所以1GB大小的文件，需要用到i_addr、direct_node与indirect_node。下面计算具体需要几个node来存储索引。
+如果仅使用i_addr与direct_node，可以索引923*4KB+2*1018*4KB=11836KB大小的文件，剩余1*1024*1024*1024KB-11836KB=1036740KB，一个direct node可以索引的文件大小为1018*4KB=4072KB，所以需要1036740/4072=254.6个direct node，所以只需要一个indirect node即可。
+综上，可以计算得到，在F2FS-4KB中，一个1GB文件的索引大小为：
+1*4KB(inode)+2*4KB(direct node)+1*4KB(single indirect node)+255*4KB(direct node)=1036KB。
+F2FS-64KB-4KB 当block变为64KB，而node大小不变时，inode基本没变，与F2FS-4KB类似。
+对于inline data，即使用i_addr区域来直接存储数据，而不是存储block地址，这种情况下i_addr最多可以存储4B*923=3692B=3.</description>
+    </item>
+    
+  </channel>
+</rss>
