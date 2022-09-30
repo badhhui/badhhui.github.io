@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>学习笔记 on RollBack?</title>
-    <link>http://example.org/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</link>
+    <link>http://badhhui.github.io/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</link>
     <description>Recent content in 学习笔记 on RollBack?</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© RollBack</copyright>
-    <lastBuildDate>Fri, 30 Sep 2022 14:52:05 +0800</lastBuildDate><atom:link href="http://example.org/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 30 Sep 2022 14:52:05 +0800</lastBuildDate><atom:link href="http://badhhui.github.io/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Block大小对F2FS的影响</title>
-      <link>http://example.org/posts/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</link>
+      <link>http://badhhui.github.io/posts/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</link>
       <pubDate>Fri, 30 Sep 2022 14:52:05 +0800</pubDate>
       
-      <guid>http://example.org/posts/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</guid>
+      <guid>http://badhhui.github.io/posts/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</guid>
       <description>Block大小对F2FS的影响 初略计算了当block大小分别为4KB（原生F2FS，记为F2FS-4KB）和64KB（记为F2FS-64KB）时，F2FS的各个元数据区域以及文件会有什么区别。
 F2FS的segment大小固定为2MB，所以block大小为4KB时，一个segment包含512个block；block为64KB时，一个segment包含32个block。
 元数据区域（1TB闪存） F2FS的物理布局如下图所示：
