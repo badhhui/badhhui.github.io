@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <script type="application/javascript" src='badhhui.github.io/js/theme-mode.js'></script>
+    <link rel="stylesheet" href='badhhui.github.io/css/frameworks.min.css' />
+    <link rel="stylesheet" href='badhhui.github.io/css/github.min.css' />
+    <link rel="stylesheet" href='badhhui.github.io/css/github-style.css' />
+    <link rel="stylesheet" href='badhhui.github.io/css/light.css' />
+    <link rel="stylesheet" href='badhhui.github.io/css/dark.css' />
+    <link rel="stylesheet" href='badhhui.github.io/css/syntax.css' />
+    <title>Block大小对F2FS的影响 - Hhui&#39;s blog</title>
+    
+    <link rel="icon" type="image/x-icon" href='/images/github.png'>
+    
+    <meta name="theme-color" content="#1e2327">
+
+    
+    <meta name="description"
+  content="初略计算Block及node size对F2FS元数据和文件索引所占空间的影响。
+" />
+<meta name="keywords"
+  content='blog, google analytics' />
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="badhhui.github.io/post/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/" />
+
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Block大小对F2FS的影响 - Hhui&#39;s blog" />
+<meta name="twitter:description"
+  content="初略计算Block及node size对F2FS元数据和文件索引所占空间的影响。
+" />
+<meta name="twitter:site" content="badhhui.github.io" />
+<meta name="twitter:creator" content="" />
+<meta name="twitter:image"
+  content="badhhui.github.io">
+
+
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Block大小对F2FS的影响 - Hhui&#39;s blog">
+<meta property="og:description"
+  content="初略计算Block及node size对F2FS元数据和文件索引所占空间的影响。
+" />
+<meta property="og:url" content="badhhui.github.io/post/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/" />
+<meta property="og:site_name" content="Block大小对F2FS的影响" />
+<meta property="og:image"
+  content="badhhui.github.io">
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+<meta property="article:published_time" content="2022-09-30 14:52:05 &#43;0800 CST" />
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body>
+  <div style="position: relative">
+  <header class="Header js-details-container Details px-3 px-md-4 px-lg-5 flex-wrap flex-md-nowrap open Details--on">
+    <div class="Header-item mobile-none" style="margin-top: -4px; margin-bottom: -4px;">
+      <a class="Header-link" href="badhhui.github.io">
+        <svg class="octicon" height="32" viewBox="0 0 16 16" version="1.1" width="32">
+          <path fill-rule="evenodd"
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+          </path>
+        </svg>
+      </a>
+    </div>
+    <div class="Header-item d-md-none">
+      <button class="Header-link btn-link js-details-target" type="button"
+        onclick="document.querySelector('#header-search').style.display = document.querySelector('#header-search').style.display == 'none'? 'block': 'none'">
+        <svg height="24" class="octicon octicon-three-bars" viewBox="0 0 16 16" version="1.1" width="24">
+          <path fill-rule="evenodd"
+            d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z">
+          </path>
+        </svg>
+      </button>
+    </div>
+    <div style="display: none;" id="header-search"
+      class="Header-item Header-item--full flex-column flex-md-row width-full flex-order-2 flex-md-order-none mr-0 mr-md-3 mt-3 mt-md-0 Details-content--hidden-not-important d-md-flex">
+      <div
+        class="Header-search header-search flex-auto js-site-search position-relative flex-self-stretch flex-md-self-auto mb-3 mb-md-0 mr-0 mr-md-3 scoped-search site-scoped-search js-jump-to">
+        <div class="position-relative">
+          <form target="_blank" action="https://www.google.com/search" accept-charset="UTF-8" method="get"
+            autocomplete="off">
+            <label
+              class="Header-search-label form-control input-sm header-search-wrapper p-0 js-chromeless-input-container header-search-wrapper-jump-to position-relative d-flex flex-justify-between flex-items-center">
+              <input type="text"
+                class="Header-search-input form-control input-sm header-search-input jump-to-field js-jump-to-field js-site-search-focus js-site-search-field is-clearable"
+                name="q" value="" placeholder="Search" autocomplete="off">
+              <input type="hidden" name="q" value="site:badhhui.github.io">
+            </label>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="Header-item Header-item--full flex-justify-center d-md-none position-relative">
+      <a class="Header-link " href="badhhui.github.io">
+        <svg class="octicon octicon-mark-github v-align-middle" height="32" viewBox="0 0 16 16" version="1.1"
+          width="32">
+          <path fill-rule="evenodd"
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+          </path>
+        </svg>
+      </a>
+    </div>
+    <div class="Header-item" style="margin-right: 0;">
+      <a href="javascript:void(0)" class="Header-link no-select" onclick="switchTheme()">
+        <svg style="fill: var(--color-profile-color-modes-toggle-moon);" class="no-select" viewBox="0 0 16 16"
+          version="1.1" width="16" height="16">
+          <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M4.52208 7.71754C7.5782 7.71754 10.0557 5.24006 10.0557 2.18394C10.0557 1.93498 10.0392 1.68986 10.0074 1.44961C9.95801 1.07727 10.3495 0.771159 10.6474 0.99992C12.1153 2.12716 13.0615 3.89999 13.0615 5.89383C13.0615 9.29958 10.3006 12.0605 6.89485 12.0605C3.95334 12.0605 1.49286 10.001 0.876728 7.24527C0.794841 6.87902 1.23668 6.65289 1.55321 6.85451C2.41106 7.40095 3.4296 7.71754 4.52208 7.71754Z">
+          </path>
+        </svg>
+      </a>
+    </div>
+  </header>
+</div>
+  
+<div>
+  <main>
+    <div class="gisthead pagehead bg-gray-light pb-0 pt-3 mb-4">
+      <div class="px-0">
+        <div class="mb-3 d-flex px-3 px-md-3 px-lg-5">
+          <div class="flex-auto min-width-0 width-fit mr-3">
+            <div class="d-flex">
+              <div class="d-none d-md-block">
+                <a class="avatar mr-2 flex-shrink-0" href="badhhui.github.io">
+                  <img class=" avatar-user"
+                    src="badhhui.github.io/images/avatar.png"
+                    width="32" height="32"></a>
+              </div>
+              <div class="d-flex flex-column">
+                <h1 class="break-word f3 text-normal mb-md-0 mb-1">
+                  <span class="author">
+                    <a href="badhhui.github.io">Hhui</a></span><span
+                    class="path-divider">/</span><strong class="css-truncate-target mr-1" style="max-width: 410px"><a
+                      href="badhhui.github.io/post/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/">Block大小对F2FS的影响</a></strong>
+                </h1>
+                <div class="note m-0">
+                  Created <relative-time datetime="Fri, 30 Sep 2022 14:52:05 &#43;0800"
+                    class="no-wrap">
+                    Fri, 30 Sep 2022 14:52:05 &#43;0800</relative-time>
+
+                  
+                  <span class="file-info-divider"></span>
+                  Modified <relative-time datetime="Mon, 10 Apr 2023 16:23:13 &#43;0800"
+                    class="no-wrap">
+                    Mon, 10 Apr 2023 16:23:13 &#43;0800</relative-time>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-lg px-3 new-discussion-timeline">
+      <div class="repository-content gist-content">
+        <div>
+          <div class="js-gist-file-update-container js-task-list-container file-box">
+            <div id="file-pytest" class="file my-2">
+              <div id="post-header" class="file-header d-flex flex-md-items-center flex-items-start sticky-header" style="z-index: 2">
+                <div class="file-info d-flex flex-md-items-center flex-items-start flex-order-1 flex-auto">
+                  <div class="text-mono f6 flex-auto pr-3 flex-order-2 flex-md-order-1 mt-2 mt-md-0">
+                    
+                    <summary id="toc-toggle" onclick="clickToc()" class="btn btn-octicon m-0 mr-2 p-2">
+                      <svg aria-hidden="true" viewBox="0 0 16 16" height="16" width="16" class="octicon octicon-list-unordered">
+                        <path fill-rule="evenodd" d="M2 4a1 1 0 100-2 1 1 0 000 2zm3.75-1.5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zm0 5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zm0 5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zM3 8a1 1 0 11-2 0 1 1 0 012 0zm-1 6a1 1 0 100-2 1 1 0 000 2z"></path>
+                      </svg>
+                    </summary>
+                    <details-menu class="SelectMenu" id="toc-details" style="display: none;">
+                      <div class="SelectMenu-modal rounded-3 mt-1" style="max-height: 340px;">
+                        <div class="SelectMenu-list SelectMenu-list--borderless p-2" style="overscroll-behavior: contain;" id="toc-list">
+                        </div>
+                      </div>
+                    </details-menu>
+                      4525 Words
+                    
+
+                  </div>
+                  <div class="file-actions flex-order-2 pt-0">
+                    
+                    
+                    <a class="muted-link mr-3" href="/tags/f2fs">
+                      <svg class="octicon octicon-tag" viewBox="0 0 16 16" version="1.1" width="16" height="16">
+                        <path fill-rule="evenodd"
+                          d="M2.5 7.775V2.75a.25.25 0 01.25-.25h5.025a.25.25 0 01.177.073l6.25 6.25a.25.25 0 010 .354l-5.025 5.025a.25.25 0 01-.354 0l-6.25-6.25a.25.25 0 01-.073-.177zm-1.5 0V2.75C1 1.784 1.784 1 2.75 1h5.025c.464 0 .91.184 1.238.513l6.25 6.25a1.75 1.75 0 010 2.474l-5.026 5.026a1.75 1.75 0 01-2.474 0l-6.25-6.25A1.75 1.75 0 011 7.775zM6 5a1 1 0 100 2 1 1 0 000-2z">
+                        </path>
+                      </svg>
+                      F2FS
+                    </a>
+                    
+                    
+                  </div>
+                </div>
+              </div>
+
+
+              <div class="Box-body px-5 pb-5" style="z-index: 1">
+                <article class="markdown-body entry-content container-lg"><p>初略计算Block及node size对F2FS元数据和文件索引所占空间的影响。</p>
+<h2 id="block大小对f2fs的影响">Block大小对F2FS的影响</h2>
+<blockquote>
+<p>初略计算了当block大小分别为4KB（原生F2FS，记为<code>F2FS-4KB</code>）和64KB（记为<code>F2FS-64KB</code>）时，F2FS的各个元数据区域以及文件会有什么区别。</p>
+</blockquote>
+<p>F2FS的<code>segment</code>大小固定为2MB，所以block大小为4KB时，一个<code>segment</code>包含512个block；block为64KB时，一个<code>segment</code>包含32个block。</p>
+<h3 id="元数据区域1tb闪存">元数据区域（1TB闪存）</h3>
+<p>F2FS的物理布局如下图所示：</p>
+<p><img src="https://blog-image-hugo.oss-cn-hangzhou.aliyuncs.com/f2fs-layout.png" alt="img"></p>
+<h4 id="super-block">Super Block</h4>
+<p>SB区域只包含了两个<code>struct f2fs_super_block</code>，存储在两个<code>block</code>中，但因为Check Point区域需要<code>segment</code>对齐，所以SB区域要占据一个<code>segment</code>，大小为<strong>2MB</strong>，<code>F2FS-4KB</code>和<code>F2FS-64KB</code>都相同。</p>
+<h4 id="check-point">Check Point</h4>
+<p>CP区域和SB区域类似，其结构如下图，主要保存了两个Check Point来保持数据一致性，每个Check Point占据一个<code>segment</code>，所以CP区域需要占据2个<code>segment</code>，大小为<strong>4MB</strong>，<code>F2FS-4KB</code>和<code>F2FS-64KB</code>都相同。</p>
+<p><img src="https://blog-image-hugo.oss-cn-hangzhou.aliyuncs.com/image-20220918234557375.png" alt="image-20220918234557375"></p>
+<h4 id="sit">SIT</h4>
+<p>SIT区域存在两份副本，其中一个表示最新的数据，f2fs通过保存在cp中的sit_nat_version_bitmap字段来指示哪个才是最新的。其物理区域实际构成如下图：</p>
+<p><img src="https://blog-image-hugo.oss-cn-hangzhou.aliyuncs.com/image-20220919090522872.png" alt="image-20220919090522872"></p>
+<p>SIT主要由<code>struct f2fs_sit_block</code>来存储段信息，其结构如下：</p>
+<p><img src="https://blog-image-hugo.oss-cn-hangzhou.aliyuncs.com/image-20220919091220894.png" alt="image-20220919091220894"></p>
+<p>其中一个<code>f2fs_sit_entry</code>表示一个<code>segment</code>，由于<code>segment</code>大小固定为2MB，且闪存大小为1TB，所以F2FS-4KB 与F2FS-64KB拥有一样多的<code>segment</code>，不同之处在于<code>segment</code>内的block数，且block size不同，所以会导致<code>valid_map</code>字段占用的字节数不同，从而导致SIT区域占用大小不同。</p>
+<p>经过计算，<code>F2FS-4KB</code>的SIT需要占用38个<code>segment</code>，即<strong>76MB</strong>；<code>F2FS-64KB</code>的SIT需要占用8个<code>segment</code>，即<strong>16MB</strong>；</p>
+<h4 id="nat">NAT</h4>
+<p>NAT的实际磁盘布局如下图，NAT按照<code>segment</code>为单位进行备份，前一个segment的备份紧跟在其后 面，每个<code>segment</code>包含多个<code>f2fs_nat_block</code>，而每个<code>f2fs_nat_block</code>包含多个个<code>f2fs_nat_entry</code>。每个<code> f2fs_nat_entry</code>描述一个node块及其块地址的信息。</p>
+<p><img src="https://blog-image-hugo.oss-cn-hangzhou.aliyuncs.com/image-20220919105936538.png" alt="image-20220919105936538"></p>
+<p>当node大小为4KB时，对于1TB大小的闪存，最多含有1TB/4KB=2^28个node。</p>
+<p>对于<code>F2FS-4KB</code>，一个<code>segment</code>可以存储512*455=232960个node，所以需要2^28/232960=1153个<code>segment</code>，由于还要存储一份副本，所以一 共需要1153*2=2306个<code>segment</code>，大小为2236*2=<strong>4612MB</strong>。</p>
+<p>对于<code>F2FS-64KB</code>，一个<code>segment</code>可以描述 32*6553=209696个node，所以需要2^28/209696=1281个<code>segment</code>，由于还要存储一份副本，所以一 共需要1281*2=2562个<code>segment</code>，大小为2562*2=<strong>5124MB</strong>。</p>
+<h4 id="ssa">SSA</h4>
+<p>SSA主要用于物理地址与逻辑地址的转换，其物理结构如下图，</p>
+<p><img src="https://blog-image-hugo.oss-cn-hangzhou.aliyuncs.com/image-20220919113832380.png" alt="image-20220919113832380"></p>
+<p>其中一个f2fs_summary_block可以用于一个segment的地址转换，1TB闪存拥有(1TB/2MB)-1=2^19-1个segment，减一是因为SB区域占据了一个segment，且该segment不参与编号。</p>
+<p>对于<code>F2FS-4KB</code>，一共需要(2^19)-1个<code>f2fs_summary_block</code>，即((2^19)-1)/512=1024个<code>segemnt</code>，大小为 1024*2MB=<strong>2048MB</strong>。</p>
+<p>对于<code>F2FS-64KB</code>，同样需要(2^19)-1个<code>f2fs_summary_block</code>，但由于一个<code>f2fs_summary_block</code>只包含了32个<code>f2fs_summary</code>，大小发生了变化，所以变成了需要要((2^19)-1)/89=5891个block，即185个 <code>segment</code>，大小为185*2MB=<strong>370MB</strong>。</p>
+<blockquote>
+<p>综上，<code>F2FS-4KB</code>的元数据区域一共占用了2+4+76+4612+2048=<strong>6742MB</strong>，约占总 存储空间大小的<strong>0.64%</strong>(6742MB/1TB*100%)。</p>
+<p>而<code>F2FS-64KB</code>的元数据区域一共占用2+4+16+5124+370=5516MB，约占总存储 空间大小的<strong>0.52%</strong>(5516MB/1TB*100%)。</p>
+</blockquote>
+<h3 id="文件索引1gb大小">文件索引（1GB大小）</h3>
+<p>对于一个1GB的文件的索引所占闪存大小，主要对比以下三种情形：block大小为4KB（记为<code>F2FS-4KB</code>）、block大小为64KB，node大小为4KB（记为<code>F2FS-64KB-4KB</code>)、block大小为64KB，node大小为64KB（记为<code>F2FS-64KB-64KB</code>)。</p>
+<p>F2FS用一个inode表示一个文件，inode的结构如下如图：</p>
+<!-- raw HTML omitted -->
+<p>可以看到inode是一个类似多级索引的结构，一般情况下block用于存储文件的数据，node存储文件的索引。下面分析三种情形下1GB文件的索引大小有什么区别。</p>
+<h4 id="f2fs-4kb">F2FS-4KB</h4>
+<p>这种情形下，node和block大小为4KB，一个inode可以存储923个block地址（即图中的i_addr）、5个node的nid（2个direct_node，2个indirect_node，1个double_indirect_node），一个node可以存储1018个nid。根据这个信息可以计算出一个inode在使用不同区域时能索引多大的文件：</p>
+<ul>
+<li>对于特别小的文件，如果将其数据用block保存，就会浪费block空间，所以F2FS可以使用<strong>inline data</strong>来存储小文件，即使用i_addr区域来直接存储数据，而不是存储block地址，这种情况下i_addr最多可以存储4B（block地址占4B）*923=3692B=<strong>3.6KB</strong>的数据；</li>
+<li>仅使用i_addr，可以索引923*4KB=3692KB=<strong>3.6MB</strong>大小的文件；</li>
+<li>使用i_addr与direct_node，可以索引923*4KB+2*1018*4KB=<strong>11.55MB</strong>大小的文件；</li>
+<li>使用i_addr、direct_node与indirect_node，可以索引923*4KB+2*1018*4KB+2*1018*1018*4KB=<strong>7.91GB</strong>大小的文件；</li>
+<li>使用i_addr、direct_node、indirect_node与double_indirect_node，可以索引923*4KB+2*1018*4KB+2*1018*1018*4KB+1*1018*1018*1018*4KB=<strong>3.93TB</strong>大小的文件；</li>
+</ul>
+<p>所以1GB大小的文件，需要用到i_addr、direct_node与indirect_node。下面计算具体需要几个node来存储索引。</p>
+<p>如果仅使用i_addr与direct_node，可以索引923*4KB+2*1018*4KB=<strong>11836KB</strong>大小的文件，剩余1*1024*1024*1024KB-11836KB=1036740KB，一个direct node可以索引的文件大小为1018*4KB=4072KB，所以需要1036740/4072=254.6个direct node，所以只需要一个indirect node即可。</p>
+<p>综上，可以计算得到，在<code>F2FS-4KB</code>中，一个1GB文件的索引大小为：</p>
+<p><strong>1*4KB(inode)+2*4KB(direct node)+1*4KB(single indirect node)+255*4KB(direct node)=1036KB。</strong></p>
+<h4 id="f2fs-64kb-4kb">F2FS-64KB-4KB</h4>
+<p>当block变为64KB，而node大小不变时，inode基本没变，与F2FS-4KB类似。</p>
+<ul>
+<li>对于inline data，即使用i_addr区域来直接存储数据，而不是存储block地址，这种情况下i_addr最多可以存储4B*923=3692B=<strong>3.6KB</strong>的数据；</li>
+<li>仅使用i_addr，可以索引923*64KB=59072KB=<strong>57.68MB</strong>大小的文件；</li>
+<li>使用i_addr与direct_node，可以索引923*64KB+2*1018*64KB=<strong>184.93MB</strong>大小的文件；</li>
+<li>使用i_addr、direct_node与indirect_node，可以索引923*64KB+2*1018*64KB+2*1018*1018*64KB=<strong>128.68GB</strong>大小的文件；</li>
+<li>使用i_addr、direct_node、indirect_node与double_indirect_node，可以索引923*64KB+2*1018*64KB+2*1018*1018*64KB+1*1018*1018*1018*64KB=<strong>63TB</strong>大小的文件；</li>
+</ul>
+<p>由之前的计算可以得出923个i_addr+2个direct node可以索引923*64KB+2*1018*64KB=<strong>189376KB</strong>大小的文件，剩余1GB-189376KB=1*1024*1024KB-189376KB=859200KB，一个direct node可以索引的文件大小为1018*64KB=65152KB，所以需要859200/65152=13.1即14个direct node，</p>
+<p>综上，可以计算得到，在F2FS-64KB中，一个1GB文件的索引大小为：</p>
+<p><strong>1*4KB(inode)+2*4KB(direct node)+1*4KB(indirect node)+14*4KB(direct node)=72KB。</strong></p>
+<h4 id="f2fs-64kb-64kb">F2FS-64KB-64KB</h4>
+<p>当block变为64KB，node也为64KB时，node可以存储的block地址或nid变多了，inode可以存储16283个block地址和5个nid，而direct node与indirect node可以存储16378个nid。</p>
+<ul>
+<li>对于inline data，这种情况下i_addr区域最多可以存储4B*16283=65132B=<strong>63.3KB</strong>的数据；</li>
+<li>仅使用i_addr，可以索引16283*64KB=1042112KB=<strong>1017.68MB</strong>大小的文件；</li>
+<li>使用i_addr与direct_node，可以索引16283*64KB+2*16378*64KB=<strong>2.99GB</strong>大小的文件；</li>
+<li>使用i_addr、direct_node与indirect_node，可以索引16283*64KB+2*16378*64KB+2*16378*16378*64KB=<strong>31.97GB</strong>大小的文件；</li>
+<li>使用i_addr、direct_node、indirect_node与double_indirect_node，可以索引16283*64KB+2*16378*64KB+2*16378*16378*64KB+1*16378*16378*16378*64KB=<strong>261888TB</strong>大小的文件；</li>
+</ul>
+<p>由之前的计算可以得出16283个直接索引可以索引16283*64KB=<strong>1042112KB</strong>大小的文件，剩余1GB-1042112KB=1*1024*1024KB-1042112KB=6464KB，一个direct node可以索引的文件大小为16378*64KB=1048192KB&gt;6464KB，所以只需要1个direct node来索引剩下的6464KB。</p>
+<p>综上，可以计算得到，在<code>F2FS-64KB-64KB</code>中，一个1GB文件的索引大小为：</p>
+<p><strong>1*64KB(inode)+1*64KB(direct node)=128KB。</strong></p></article>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script type="application/javascript" src='badhhui.github.io/js/toc.js'></script>
+<link rel="stylesheet" href='badhhui.github.io/css/toc.css' />
+
+<div id="gitalk-container" class="gitalk-container"></div>
+<link rel="stylesheet" href='badhhui.github.io/css/gitalk.css'>
+<script src='badhhui.github.io/js/gitalk.min.js'></script>
+<script>
+  const gitalk = new Gitalk({
+    clientID: 'cd41ba59cccd2dd5cce1',
+    clientSecret: '052849b467538f916e56aa994400aa99dee2f83c',
+    repo: 'badhhui',
+    owner: 'badhhui',
+    admin: ['badhhui'],
+    id: eval("location.pathname"), 
+    distractionFreeMode: false 
+  });
+  (function() {
+    gitalk.render('gitalk-container');
+  })();
+</script>
+
+
+  <div class="footer container-xl width-full p-responsive">
+  <div
+    class="position-relative d-flex flex-row-reverse flex-lg-row flex-wrap flex-lg-nowrap flex-justify-center flex-lg-justify-between flex-sm-items-center pt-6 pb-2 mt-6 f6 text-gray border-top border-gray-light ">
+    <a aria-label="Homepage" title="GitHub" class="footer-octicon d-none d-lg-block mr-lg-4" href="badhhui.github.io">
+      <svg height="24" class="octicon octicon-mark-github" viewBox="0 0 16 16" version="1.1" width="24">
+        <path fill-rule="evenodd"
+          d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+        </path>
+      </svg>
+    </a>
+    <ul class="list-style-none d-flex flex-wrap col-12 flex-justify-center flex-lg-justify-between mb-2 mb-lg-0">
+      
+      <li class="mr-3 mr-lg-0">Theme by <a href='https://github.com/MeiK2333/github-style'>github-style</a></li>
+      
+    </ul>
+  </div>
+  <div class="d-flex flex-justify-center pb-6">
+    <span class="f6 text-gray-light"></span>
+  </div>
+
+
+</div>
+</body>
+
+<script type="application/javascript" src="badhhui.github.io/js/github-style.js"></script>
+
+
+
+
+</html>
