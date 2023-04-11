@@ -241,6 +241,7 @@
 
 <div id="gitalk-container" class="gitalk-container"></div>
 <link rel="stylesheet" href='https://badhhui.github.io/css/gitalk.css'>
+<script src="js/md5.min.js"></script>
 <script src='https://badhhui.github.io/js/gitalk.min.js'></script>
 <script>
   const gitalk = new Gitalk({
@@ -249,7 +250,7 @@
     repo: 'badhhui.github.io',
     owner: 'badhhui',
     admin: ['badhhui'],
-    id: 'BlogComments', 
+    id: md5('location.pathname'), 
     distractionFreeMode: false 
   });
   (function() {
