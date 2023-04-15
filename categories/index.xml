@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on Hhui&#39;s blog</title>
-    <link>https://hhui.me/categories/</link>
+    <link>https://blog.hhui.me/categories/</link>
     <description>Recent content in Categories on Hhui&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Fri, 30 Sep 2022 14:52:05 +0800</lastBuildDate><atom:link href="https://hhui.me/categories/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 30 Sep 2022 14:52:05 +0800</lastBuildDate><atom:link href="https://blog.hhui.me/categories/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>学习笔记</title>
-      <link>https://hhui.me/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</link>
+      <link>https://blog.hhui.me/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</link>
       <pubDate>Fri, 30 Sep 2022 14:52:05 +0800</pubDate>
       
-      <guid>https://hhui.me/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</guid>
+      <guid>https://blog.hhui.me/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</guid>
       <description></description>
     </item>
     

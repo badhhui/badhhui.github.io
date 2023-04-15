@@ -2,44 +2,44 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on Hhui&#39;s blog</title>
-    <link>https://hhui.me/post/</link>
+    <link>https://blog.hhui.me/post/</link>
     <description>Recent content in Posts on Hhui&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Fri, 14 Apr 2023 19:37:19 +0800</lastBuildDate><atom:link href="https://hhui.me/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 14 Apr 2023 19:37:19 +0800</lastBuildDate><atom:link href="https://blog.hhui.me/post/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>eBPF学习笔记</title>
-      <link>https://hhui.me/post/ebpf%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</link>
+      <link>https://blog.hhui.me/post/ebpf%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</link>
       <pubDate>Fri, 14 Apr 2023 19:37:19 +0800</pubDate>
       
-      <guid>https://hhui.me/post/ebpf%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</guid>
+      <guid>https://blog.hhui.me/post/ebpf%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</guid>
       <description>&lt;p&gt;eBPF学习笔记&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Ubuntu使用蓝牙适配器</title>
-      <link>https://hhui.me/post/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</link>
+      <link>https://blog.hhui.me/post/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</link>
       <pubDate>Sat, 15 Oct 2022 11:24:59 +0800</pubDate>
       
-      <guid>https://hhui.me/post/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</guid>
+      <guid>https://blog.hhui.me/post/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</guid>
       <description>&lt;p&gt;介绍了Ubuntu如何使用蓝牙适配器。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>F2FS</title>
-      <link>https://hhui.me/post/f2fs/</link>
+      <link>https://blog.hhui.me/post/f2fs/</link>
       <pubDate>Fri, 30 Sep 2022 15:04:21 +0800</pubDate>
       
-      <guid>https://hhui.me/post/f2fs/</guid>
+      <guid>https://blog.hhui.me/post/f2fs/</guid>
       <description>&lt;p&gt;F2FS是一个Linux文件系统，适用于闪存设备，论文的实验结果表明F2FS要比EXT4的性能好很多。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Block大小对F2FS的影响</title>
-      <link>https://hhui.me/post/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</link>
+      <link>https://blog.hhui.me/post/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</link>
       <pubDate>Fri, 30 Sep 2022 14:52:05 +0800</pubDate>
       
-      <guid>https://hhui.me/post/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</guid>
+      <guid>https://blog.hhui.me/post/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</guid>
       <description>&lt;p&gt;初略计算Block及node size对F2FS元数据和文件索引所占空间的影响。&lt;/p&gt;</description>
     </item>
     

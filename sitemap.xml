@@ -2,61 +2,61 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://hhui.me/tags/ebpf/</loc>
+    <loc>https://blog.hhui.me/tags/ebpf/</loc>
     <lastmod>2023-04-14T20:52:09+08:00</lastmod>
   </url><url>
-    <loc>https://hhui.me/post/ebpf%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</loc>
+    <loc>https://blog.hhui.me/post/ebpf%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</loc>
     <lastmod>2023-04-14T20:52:09+08:00</lastmod>
   </url><url>
-    <loc>https://hhui.me/</loc>
+    <loc>https://blog.hhui.me/</loc>
     <lastmod>2023-04-14T20:52:09+08:00</lastmod>
   </url><url>
-    <loc>https://hhui.me/post/</loc>
+    <loc>https://blog.hhui.me/post/</loc>
     <lastmod>2023-04-14T20:52:09+08:00</lastmod>
   </url><url>
-    <loc>https://hhui.me/tags/</loc>
+    <loc>https://blog.hhui.me/tags/</loc>
     <lastmod>2023-04-14T20:52:09+08:00</lastmod>
   </url><url>
-    <loc>https://hhui.me/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</loc>
+    <loc>https://blog.hhui.me/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</loc>
     <lastmod>2023-04-14T20:52:09+08:00</lastmod>
   </url><url>
-    <loc>https://hhui.me/posts/</loc>
+    <loc>https://blog.hhui.me/posts/</loc>
     <lastmod>2022-10-15T11:27:29+08:00</lastmod>
   </url><url>
-    <loc>https://hhui.me/tags/ubuntu/</loc>
+    <loc>https://blog.hhui.me/tags/ubuntu/</loc>
     <lastmod>2023-04-14T11:50:14+08:00</lastmod>
   </url><url>
-    <loc>https://hhui.me/post/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</loc>
+    <loc>https://blog.hhui.me/post/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</loc>
     <lastmod>2023-04-14T11:50:14+08:00</lastmod>
   </url><url>
-    <loc>https://hhui.me/posts/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</loc>
+    <loc>https://blog.hhui.me/posts/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</loc>
     <lastmod>2022-10-15T11:27:29+08:00</lastmod>
   </url><url>
-    <loc>https://hhui.me/about/</loc>
+    <loc>https://blog.hhui.me/about/</loc>
     <lastmod>2022-10-05T14:08:40+08:00</lastmod>
   </url><url>
-    <loc>https://hhui.me/tags/f2fs/</loc>
+    <loc>https://blog.hhui.me/tags/f2fs/</loc>
     <lastmod>2023-04-10T16:23:52+08:00</lastmod>
   </url><url>
-    <loc>https://hhui.me/post/f2fs/</loc>
+    <loc>https://blog.hhui.me/post/f2fs/</loc>
     <lastmod>2023-04-10T16:23:52+08:00</lastmod>
   </url><url>
-    <loc>https://hhui.me/posts/f2fs/</loc>
+    <loc>https://blog.hhui.me/posts/f2fs/</loc>
     <lastmod>2022-09-30T15:26:22+08:00</lastmod>
   </url><url>
-    <loc>https://hhui.me/tags/%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/</loc>
+    <loc>https://blog.hhui.me/tags/%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/</loc>
     <lastmod>2023-04-10T16:23:52+08:00</lastmod>
   </url><url>
-    <loc>https://hhui.me/post/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</loc>
+    <loc>https://blog.hhui.me/post/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</loc>
     <lastmod>2023-04-10T16:23:13+08:00</lastmod>
   </url><url>
-    <loc>https://hhui.me/posts/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</loc>
+    <loc>https://blog.hhui.me/posts/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</loc>
     <lastmod>2022-09-30T15:26:29+08:00</lastmod>
   </url><url>
-    <loc>https://hhui.me/categories/</loc>
+    <loc>https://blog.hhui.me/categories/</loc>
     <lastmod>2023-04-10T16:23:13+08:00</lastmod>
   </url><url>
-    <loc>https://hhui.me/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</loc>
+    <loc>https://blog.hhui.me/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</loc>
     <lastmod>2023-04-10T16:23:13+08:00</lastmod>
   </url>
 </urlset>

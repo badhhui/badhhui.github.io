@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on Hhui&#39;s blog</title>
-    <link>https://hhui.me/posts/</link>
+    <link>https://blog.hhui.me/posts/</link>
     <description>Recent content in Posts on Hhui&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Sat, 15 Oct 2022 11:24:59 +0800</lastBuildDate><atom:link href="https://hhui.me/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 15 Oct 2022 11:24:59 +0800</lastBuildDate><atom:link href="https://blog.hhui.me/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Ubuntu使用蓝牙适配器</title>
-      <link>https://hhui.me/posts/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</link>
+      <link>https://blog.hhui.me/posts/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</link>
       <pubDate>Sat, 15 Oct 2022 11:24:59 +0800</pubDate>
       
-      <guid>https://hhui.me/posts/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</guid>
+      <guid>https://blog.hhui.me/posts/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</guid>
       <description>绿联CM390蓝牙适配器驱动 背景 由于实验室的机箱不支持蓝牙功能，而我又不想使用实验室里先进的鼠标和键盘，于是想买一个蓝牙适配器来连接我的蓝牙键盘。蓝牙适配器是在京东的绿联自营店买的，型号为CM390，官方的说法是只支持Windows系统，本着买都买了的精神，决定折腾一下，上网搜索了一下，果然有适配Linux的方法，下面我就详细介绍过程。
 环境 OS：Ubuntu 18.04.6 LTS
 Kernel：Linux 5.4.0
@@ -35,10 +35,10 @@ sudo cp 你解压的驱动的路径/BT5.0_Linux/20201202_LINUX_BT_DRIVER/usb/blu
     
     <item>
       <title>F2FS</title>
-      <link>https://hhui.me/posts/f2fs/</link>
+      <link>https://blog.hhui.me/posts/f2fs/</link>
       <pubDate>Fri, 30 Sep 2022 15:04:21 +0800</pubDate>
       
-      <guid>https://hhui.me/posts/f2fs/</guid>
+      <guid>https://blog.hhui.me/posts/f2fs/</guid>
       <description>Abstract F2FS是一个Linux文件系统，适用于闪存设备，论文的实验结果表明F2FS要比EXT4的性能好很多。
 1. Introduction 闪存的使用很广泛，服务器系统也开始使用闪存。但是闪存有几个局限性：需要先擦后写、需要按顺序写入被擦除的块、每个擦除块的写入周期有限。
 随着存储需求的增长，多个闪存芯片通过一个专门的控制器连接。在控制器上运行的固件，通常称为FTL（闪存转换层），可以解决NAND闪存的限制，并且提供一个通用的块设备抽象。
@@ -66,10 +66,10 @@ F2FS有前台清理和后台清理，前台清理只有在没有足够空闲部�
     
     <item>
       <title>Block大小对F2FS的影响</title>
-      <link>https://hhui.me/posts/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</link>
+      <link>https://blog.hhui.me/posts/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</link>
       <pubDate>Fri, 30 Sep 2022 14:52:05 +0800</pubDate>
       
-      <guid>https://hhui.me/posts/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</guid>
+      <guid>https://blog.hhui.me/posts/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</guid>
       <description>Block大小对F2FS的影响 初略计算了当block大小分别为4KB（原生F2FS，记为F2FS-4KB）和64KB（记为F2FS-64KB）时，F2FS的各个元数据区域以及文件会有什么区别。
 F2FS的segment大小固定为2MB，所以block大小为4KB时，一个segment包含512个block；block为64KB时，一个segment包含32个block。
 元数据区域（1TB闪存） F2FS的物理布局如下图所示：

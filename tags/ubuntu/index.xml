@@ -2,26 +2,26 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Ubuntu on Hhui&#39;s blog</title>
-    <link>https://hhui.me/tags/ubuntu/</link>
+    <link>https://blog.hhui.me/tags/ubuntu/</link>
     <description>Recent content in Ubuntu on Hhui&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Sat, 15 Oct 2022 11:24:59 +0800</lastBuildDate><atom:link href="https://hhui.me/tags/ubuntu/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 15 Oct 2022 11:24:59 +0800</lastBuildDate><atom:link href="https://blog.hhui.me/tags/ubuntu/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Ubuntu使用蓝牙适配器</title>
-      <link>https://hhui.me/post/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</link>
+      <link>https://blog.hhui.me/post/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</link>
       <pubDate>Sat, 15 Oct 2022 11:24:59 +0800</pubDate>
       
-      <guid>https://hhui.me/post/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</guid>
+      <guid>https://blog.hhui.me/post/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</guid>
       <description>&lt;p&gt;介绍了Ubuntu如何使用蓝牙适配器。&lt;/p&gt;</description>
     </item>
     
     <item>
       <title>Ubuntu使用蓝牙适配器</title>
-      <link>https://hhui.me/posts/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</link>
+      <link>https://blog.hhui.me/posts/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</link>
       <pubDate>Sat, 15 Oct 2022 11:24:59 +0800</pubDate>
       
-      <guid>https://hhui.me/posts/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</guid>
+      <guid>https://blog.hhui.me/posts/ubuntu%E4%BD%BF%E7%94%A8%E8%93%9D%E7%89%99%E9%80%82%E9%85%8D%E5%99%A8/</guid>
       <description>绿联CM390蓝牙适配器驱动 背景 由于实验室的机箱不支持蓝牙功能，而我又不想使用实验室里先进的鼠标和键盘，于是想买一个蓝牙适配器来连接我的蓝牙键盘。蓝牙适配器是在京东的绿联自营店买的，型号为CM390，官方的说法是只支持Windows系统，本着买都买了的精神，决定折腾一下，上网搜索了一下，果然有适配Linux的方法，下面我就详细介绍过程。
 环境 OS：Ubuntu 18.04.6 LTS
 Kernel：Linux 5.4.0
