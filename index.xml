@@ -6,7 +6,16 @@
     <description>Recent content on Hhui&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Fri, 14 Apr 2023 19:37:19 +0800</lastBuildDate><atom:link href="https://blog.hhui.me/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 17 Apr 2023 19:51:19 +0800</lastBuildDate><atom:link href="https://blog.hhui.me/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>MacbookAir M2 外接双显示器</title>
+      <link>https://blog.hhui.me/post/macbookair-m2%E5%A4%96%E6%8E%A5%E5%8F%8C%E6%98%BE%E7%A4%BA%E5%99%A8/</link>
+      <pubDate>Mon, 17 Apr 2023 19:51:19 +0800</pubDate>
+      
+      <guid>https://blog.hhui.me/post/macbookair-m2%E5%A4%96%E6%8E%A5%E5%8F%8C%E6%98%BE%E7%A4%BA%E5%99%A8/</guid>
+      <description>&lt;p&gt;最近购入了一台4K显示器，配合另一台2K显示器组成双显示器，但由于我的Macbook Air只能支持外接单显示器，所以记录一下我的解决方案。&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>eBPF学习笔记</title>
       <link>https://blog.hhui.me/post/ebpf%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</link>
