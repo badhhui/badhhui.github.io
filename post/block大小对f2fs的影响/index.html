@@ -248,7 +248,7 @@
 <h3 id="文件索引1gb大小">文件索引（1GB大小）</h3>
 <p>对于一个1GB的文件的索引所占闪存大小，主要对比以下三种情形：block大小为4KB（记为<code>F2FS-4KB</code>）、block大小为64KB，node大小为4KB（记为<code>F2FS-64KB-4KB</code>)、block大小为64KB，node大小为64KB（记为<code>F2FS-64KB-64KB</code>)。</p>
 <p>F2FS用一个inode表示一个文件，inode的结构如下如图：</p>
-<!-- raw HTML omitted -->
+<img src="https://blog-image-hugo.oss-cn-hangzhou.aliyuncs.com/image-20220919172415741.png" alt="image-20220919172415741" style="zoom: 80%;" />
 <p>可以看到inode是一个类似多级索引的结构，一般情况下block用于存储文件的数据，node存储文件的索引。下面分析三种情形下1GB文件的索引大小有什么区别。</p>
 <h4 id="f2fs-4kb">F2FS-4KB</h4>
 <p>这种情形下，node和block大小为4KB，一个inode可以存储923个block地址（即图中的i_addr）、5个node的nid（2个direct_node，2个indirect_node，1个double_indirect_node），一个node可以存储1018个nid。根据这个信息可以计算出一个inode在使用不同区域时能索引多大的文件：</p>
