@@ -2,16 +2,22 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://blog.hhui.me/</loc>
+    <lastmod>2023-09-16T17:04:02+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.hhui.me/post/mit_s6.081_lab2/</loc>
+    <lastmod>2023-09-16T16:58:16+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.hhui.me/post/</loc>
+    <lastmod>2023-09-16T17:04:02+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.hhui.me/post/mit_s6.081_lab1/</loc>
+    <lastmod>2023-09-16T17:04:02+08:00</lastmod>
+  </url><url>
     <loc>https://blog.hhui.me/tags/ebpf/</loc>
     <lastmod>2023-04-20T16:27:41+08:00</lastmod>
   </url><url>
     <loc>https://blog.hhui.me/post/ebpf%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</loc>
-    <lastmod>2023-04-20T16:27:41+08:00</lastmod>
-  </url><url>
-    <loc>https://blog.hhui.me/</loc>
-    <lastmod>2023-04-20T16:27:41+08:00</lastmod>
-  </url><url>
-    <loc>https://blog.hhui.me/post/</loc>
     <lastmod>2023-04-20T16:27:41+08:00</lastmod>
   </url><url>
     <loc>https://blog.hhui.me/tags/</loc>
