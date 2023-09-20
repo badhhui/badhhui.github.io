@@ -154,7 +154,7 @@
                 </path>
               </svg>
               Posts
-              <span class="Counter">5</span>
+              <span class="Counter">6</span>
             </a>
           </nav>
           <div class="profile-color-modes js-promo-color-modes-banner-profile isInitialToggle">
@@ -429,7 +429,7 @@
         </path>
       </svg>
       Posts
-      <span class="Counter ">5</span>
+      <span class="Counter ">6</span>
     </a>
   </nav>
 </div>
@@ -510,6 +510,41 @@
         
       
       <ul>
+        
+        <li class="col-12 d-flex width-full py-4 border-bottom color-border-secondary public source">
+          <div class="col-12 d-inline-block">
+            <div class="d-inline-block mb-1">
+              <h3 class="wb-break-all">
+                <a href="https://blog.hhui.me/post/oh-my-zsh/">oh my zsh安装记录</a>
+              </h3>
+            </div>
+
+            <div>
+              <div class="col-12 d-inline-block text-gray mb-2 pr-4">
+                安装zsh
+sudo apt install zsh 下载并使用zsh
+sh -c &#34;$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)&#34; 下载powerlevel10k主题
+# Linux git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k echo &#39;source ~/powerlevel10k/powerlevel10k.zsh-theme&#39; &gt;&gt;~/.zshrc # Mac Homebrew brew install powerlevel10k echo &#34;source $(brew --prefix)/share/powerlevel10k/powerlevel10k.zsh-theme&#34; &gt;&gt;~/.zshrc 修改zsh配置文件使用p10k主题
+ZSH_THEME=&#34;powerlevel10k/powerlevel10k&#34; source ~/.zshrc 根据提示配置powerlevel10k
+使用语法高亮插件
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting 使用命令建议插件
+git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions 修改zsh配置文件添加以上插件
+plugins=(git zsh-syntax-highlighting zsh-autosuggestions) 应用修改
+source ~/.zshrc 
+              </div>
+            </div>
+
+            <div class="f6 text-gray mt-2">
+              
+
+              Created
+              <relative-time datetime=" Wed, 20 Sep 2023 16:01:25 &#43;0800" class="no-wrap"
+                title=" Wed, 20 Sep 2023 16:01:25 &#43;0800">
+                Wed, 20 Sep 2023 16:01:25 &#43;0800
+              </relative-time>
+            </div>
+          </div>
+        </li>
         
         <li class="col-12 d-flex width-full py-4 border-bottom color-border-secondary public source">
           <div class="col-12 d-inline-block">
