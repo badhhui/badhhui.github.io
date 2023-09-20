@@ -21,7 +21,7 @@
   content="安装zsh
 sudo apt install zsh 下载并使用zsh
 sh -c &amp;#34;$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)&amp;#34; 下载powerlevel10k主题
-# Linux git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k echo &amp;#39;source ~/powerlevel10k/powerlevel10k.zsh-theme&amp;#39; &amp;gt;&amp;gt;~/.zshrc # Mac Homebrew brew install powerlevel10k echo &amp;#34;source $(brew --prefix)/share/powerlevel10k/powerlevel10k.zsh-theme&amp;#34; &amp;gt;&amp;gt;~/.zshrc 修改zsh配置文件使用p10k主题
+# zsh git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k 修改zsh配置文件使用p10k主题
 ZSH_THEME=&amp;#34;powerlevel10k/powerlevel10k&amp;#34; source ~/.zshrc 根据提示配置powerlevel10k
 使用语法高亮插件
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting 使用命令建议插件
@@ -40,7 +40,7 @@ source ~/.zshrc " />
   content="安装zsh
 sudo apt install zsh 下载并使用zsh
 sh -c &amp;#34;$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)&amp;#34; 下载powerlevel10k主题
-# Linux git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k echo &amp;#39;source ~/powerlevel10k/powerlevel10k.zsh-theme&amp;#39; &amp;gt;&amp;gt;~/.zshrc # Mac Homebrew brew install powerlevel10k echo &amp;#34;source $(brew --prefix)/share/powerlevel10k/powerlevel10k.zsh-theme&amp;#34; &amp;gt;&amp;gt;~/.zshrc 修改zsh配置文件使用p10k主题
+# zsh git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k 修改zsh配置文件使用p10k主题
 ZSH_THEME=&amp;#34;powerlevel10k/powerlevel10k&amp;#34; source ~/.zshrc 根据提示配置powerlevel10k
 使用语法高亮插件
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting 使用命令建议插件
@@ -59,7 +59,7 @@ source ~/.zshrc " />
   content="安装zsh
 sudo apt install zsh 下载并使用zsh
 sh -c &amp;#34;$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)&amp;#34; 下载powerlevel10k主题
-# Linux git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k echo &amp;#39;source ~/powerlevel10k/powerlevel10k.zsh-theme&amp;#39; &amp;gt;&amp;gt;~/.zshrc # Mac Homebrew brew install powerlevel10k echo &amp;#34;source $(brew --prefix)/share/powerlevel10k/powerlevel10k.zsh-theme&amp;#34; &amp;gt;&amp;gt;~/.zshrc 修改zsh配置文件使用p10k主题
+# zsh git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k 修改zsh配置文件使用p10k主题
 ZSH_THEME=&amp;#34;powerlevel10k/powerlevel10k&amp;#34; source ~/.zshrc 根据提示配置powerlevel10k
 使用语法高亮插件
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting 使用命令建议插件
@@ -177,9 +177,9 @@ source ~/.zshrc " />
 
                   
                   <span class="file-info-divider"></span>
-                  Modified <relative-time datetime="Wed, 20 Sep 2023 16:20:42 &#43;0800"
+                  Modified <relative-time datetime="Wed, 20 Sep 2023 16:48:27 &#43;0800"
                     class="no-wrap">
-                    Wed, 20 Sep 2023 16:20:42 &#43;0800</relative-time>
+                    Wed, 20 Sep 2023 16:48:27 &#43;0800</relative-time>
                   
                 </div>
               </div>
@@ -209,7 +209,7 @@ source ~/.zshrc " />
                         </div>
                       </div>
                     </details-menu>
-                      148 Words
+                      133 Words
                     
 
                   </div>
@@ -227,13 +227,8 @@ source ~/.zshrc " />
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">sh -c <span class="s2">&#34;</span><span class="k">$(</span>curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh<span class="k">)</span><span class="s2">&#34;</span>
 </span></span></code></pre></div><p><img src="https://blog-image-hugo.oss-cn-hangzhou.aliyuncs.com/202309201604631.png" alt="image-20230920160412789"></p>
 <p>下载<a href="https://github.com/romkatv/powerlevel10k">powerlevel10k</a>主题</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Linux</span>
-</span></span><span class="line"><span class="cl">git clone --depth<span class="o">=</span><span class="m">1</span> https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k
-</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="s1">&#39;source ~/powerlevel10k/powerlevel10k.zsh-theme&#39;</span> &gt;&gt;~/.zshrc
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># Mac Homebrew</span>
-</span></span><span class="line"><span class="cl">brew install powerlevel10k
-</span></span><span class="line"><span class="cl"><span class="nb">echo</span> <span class="s2">&#34;source </span><span class="k">$(</span>brew --prefix<span class="k">)</span><span class="s2">/share/powerlevel10k/powerlevel10k.zsh-theme&#34;</span> &gt;&gt;~/.zshrc
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># zsh</span>
+</span></span><span class="line"><span class="cl">git clone --depth<span class="o">=</span><span class="m">1</span> https://github.com/romkatv/powerlevel10k.git <span class="si">${</span><span class="nv">ZSH_CUSTOM</span><span class="k">:-</span><span class="nv">$HOME</span><span class="p">/.oh-my-zsh/custom</span><span class="si">}</span>/themes/powerlevel10k
 </span></span></code></pre></div><p>修改zsh配置文件使用p10k主题</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell"><span class="line"><span class="cl"><span class="nv">ZSH_THEME</span><span class="o">=</span><span class="s2">&#34;powerlevel10k/powerlevel10k&#34;</span>
 </span></span><span class="line"><span class="cl"><span class="nb">source</span> ~/.zshrc
