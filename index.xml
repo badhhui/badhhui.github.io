@@ -13,16 +13,7 @@
       <pubDate>Wed, 20 Sep 2023 16:01:25 +0800</pubDate>
       
       <guid>https://blog.hhui.me/post/oh-my-zsh/</guid>
-      <description>安装zsh
-sudo apt install zsh 下载并使用zsh
-sh -c &amp;#34;$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)&amp;#34; 下载powerlevel10k主题
-# zsh git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k 修改zsh配置文件使用p10k主题
-ZSH_THEME=&amp;#34;powerlevel10k/powerlevel10k&amp;#34; source ~/.zshrc 根据提示配置powerlevel10k
-使用语法高亮插件
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting 使用命令建议插件
-git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions 修改zsh配置文件添加以上插件
-plugins=(git zsh-syntax-highlighting zsh-autosuggestions) 应用修改
-source ~/.zshrc </description>
+      <description>&lt;p&gt;安装oh my zsh记录过程&lt;/p&gt;</description>
     </item>
     
     <item>
