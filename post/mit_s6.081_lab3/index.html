@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <script type="application/javascript" src='https://blog.hhui.me/js/theme-mode.js'></script>
+    <link rel="stylesheet" href='https://blog.hhui.me/css/frameworks.min.css' />
+    <link rel="stylesheet" href='https://blog.hhui.me/css/github.min.css' />
+    <link rel="stylesheet" href='https://blog.hhui.me/css/github-style.css' />
+    <link rel="stylesheet" href='https://blog.hhui.me/css/light.css' />
+    <link rel="stylesheet" href='https://blog.hhui.me/css/dark.css' />
+    <link rel="stylesheet" href='https://blog.hhui.me/css/syntax.css' />
+    <title>MIT s6.081 lab3 - Hhui&#39;s blog</title>
+    
+    <link rel="icon" type="image/x-icon" href='/images/github.png'>
+    
+    <meta name="theme-color" content="#1e2327">
+
+    
+    <meta name="description"
+  content="MIT s6.081课程笔记及实验
+" />
+<meta name="keywords"
+  content='blog, google analytics' />
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="https://blog.hhui.me/post/mit_s6.081_lab3/" />
+
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="MIT s6.081 lab3 - Hhui&#39;s blog" />
+<meta name="twitter:description"
+  content="MIT s6.081课程笔记及实验
+" />
+<meta name="twitter:site" content="https://blog.hhui.me" />
+<meta name="twitter:creator" content="" />
+<meta name="twitter:image"
+  content="https://blog.hhui.me">
+
+
+<meta property="og:type" content="article" />
+<meta property="og:title" content="MIT s6.081 lab3 - Hhui&#39;s blog">
+<meta property="og:description"
+  content="MIT s6.081课程笔记及实验
+" />
+<meta property="og:url" content="https://blog.hhui.me/post/mit_s6.081_lab3/" />
+<meta property="og:site_name" content="MIT s6.081 lab3" />
+<meta property="og:image"
+  content="https://blog.hhui.me">
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+<meta property="article:published_time" content="2023-09-22 20:15:43 &#43;0800 CST" />
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body>
+  <div style="position: relative">
+  <header class="Header js-details-container Details px-3 px-md-4 px-lg-5 flex-wrap flex-md-nowrap open Details--on">
+    <div class="Header-item mobile-none" style="margin-top: -4px; margin-bottom: -4px;">
+      <a class="Header-link" href="https://blog.hhui.me">
+        <svg class="octicon" height="32" viewBox="0 0 16 16" version="1.1" width="32">
+          <path fill-rule="evenodd"
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+          </path>
+        </svg>
+      </a>
+    </div>
+    <div class="Header-item d-md-none">
+      <button class="Header-link btn-link js-details-target" type="button"
+        onclick="document.querySelector('#header-search').style.display = document.querySelector('#header-search').style.display == 'none'? 'block': 'none'">
+        <svg height="24" class="octicon octicon-three-bars" viewBox="0 0 16 16" version="1.1" width="24">
+          <path fill-rule="evenodd"
+            d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z">
+          </path>
+        </svg>
+      </button>
+    </div>
+    <div style="display: none;" id="header-search"
+      class="Header-item Header-item--full flex-column flex-md-row width-full flex-order-2 flex-md-order-none mr-0 mr-md-3 mt-3 mt-md-0 Details-content--hidden-not-important d-md-flex">
+      <div
+        class="Header-search header-search flex-auto js-site-search position-relative flex-self-stretch flex-md-self-auto mb-3 mb-md-0 mr-0 mr-md-3 scoped-search site-scoped-search js-jump-to">
+        <div class="position-relative">
+          <form target="_blank" action="https://www.google.com/search" accept-charset="UTF-8" method="get"
+            autocomplete="off">
+            <label
+              class="Header-search-label form-control input-sm header-search-wrapper p-0 js-chromeless-input-container header-search-wrapper-jump-to position-relative d-flex flex-justify-between flex-items-center">
+              <input type="text"
+                class="Header-search-input form-control input-sm header-search-input jump-to-field js-jump-to-field js-site-search-focus js-site-search-field is-clearable"
+                name="q" value="" placeholder="Search" autocomplete="off">
+              <input type="hidden" name="q" value="site:https://blog.hhui.me">
+            </label>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="Header-item Header-item--full flex-justify-center d-md-none position-relative">
+      <a class="Header-link " href="https://blog.hhui.me">
+        <svg class="octicon octicon-mark-github v-align-middle" height="32" viewBox="0 0 16 16" version="1.1"
+          width="32">
+          <path fill-rule="evenodd"
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+          </path>
+        </svg>
+      </a>
+    </div>
+    <div class="Header-item" style="margin-right: 0;">
+      <a href="javascript:void(0)" class="Header-link no-select" onclick="switchTheme()">
+        <svg style="fill: var(--color-profile-color-modes-toggle-moon);" class="no-select" viewBox="0 0 16 16"
+          version="1.1" width="16" height="16">
+          <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M4.52208 7.71754C7.5782 7.71754 10.0557 5.24006 10.0557 2.18394C10.0557 1.93498 10.0392 1.68986 10.0074 1.44961C9.95801 1.07727 10.3495 0.771159 10.6474 0.99992C12.1153 2.12716 13.0615 3.89999 13.0615 5.89383C13.0615 9.29958 10.3006 12.0605 6.89485 12.0605C3.95334 12.0605 1.49286 10.001 0.876728 7.24527C0.794841 6.87902 1.23668 6.65289 1.55321 6.85451C2.41106 7.40095 3.4296 7.71754 4.52208 7.71754Z">
+          </path>
+        </svg>
+      </a>
+    </div>
+  </header>
+</div>
+  
+<div>
+  <main>
+    <div class="gisthead pagehead bg-gray-light pb-0 pt-3 mb-4">
+      <div class="px-0">
+        <div class="mb-3 d-flex px-3 px-md-3 px-lg-5">
+          <div class="flex-auto min-width-0 width-fit mr-3">
+            <div class="d-flex">
+              <div class="d-none d-md-block">
+                <a class="avatar mr-2 flex-shrink-0" href="https://blog.hhui.me">
+                  <img class=" avatar-user"
+                    src="https://blog.hhui.me/images/avatar.png"
+                    width="32" height="32"></a>
+              </div>
+              <div class="d-flex flex-column">
+                <h1 class="break-word f3 text-normal mb-md-0 mb-1">
+                  <span class="author">
+                    <a href="https://blog.hhui.me">Hhui</a></span><span
+                    class="path-divider">/</span><strong class="css-truncate-target mr-1" style="max-width: 410px"><a
+                      href="https://blog.hhui.me/post/mit_s6.081_lab3/">MIT s6.081 lab3</a></strong>
+                </h1>
+                <div class="note m-0">
+                  Created <relative-time datetime="Fri, 22 Sep 2023 20:15:43 &#43;0800"
+                    class="no-wrap">
+                    Fri, 22 Sep 2023 20:15:43 &#43;0800</relative-time>
+
+                  
+                  <span class="file-info-divider"></span>
+                  Modified <relative-time datetime="Tue, 26 Sep 2023 09:48:42 &#43;0800"
+                    class="no-wrap">
+                    Tue, 26 Sep 2023 09:48:42 &#43;0800</relative-time>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-lg px-3 new-discussion-timeline">
+      <div class="repository-content gist-content">
+        <div>
+          <div class="js-gist-file-update-container js-task-list-container file-box">
+            <div id="file-pytest" class="file my-2">
+              <div id="post-header" class="file-header d-flex flex-md-items-center flex-items-start sticky-header" style="z-index: 2">
+                <div class="file-info d-flex flex-md-items-center flex-items-start flex-order-1 flex-auto">
+                  <div class="text-mono f6 flex-auto pr-3 flex-order-2 flex-md-order-1 mt-2 mt-md-0">
+                    
+                    <summary id="toc-toggle" onclick="clickToc()" class="btn btn-octicon m-0 mr-2 p-2">
+                      <svg aria-hidden="true" viewBox="0 0 16 16" height="16" width="16" class="octicon octicon-list-unordered">
+                        <path fill-rule="evenodd" d="M2 4a1 1 0 100-2 1 1 0 000 2zm3.75-1.5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zm0 5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zm0 5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zM3 8a1 1 0 11-2 0 1 1 0 012 0zm-1 6a1 1 0 100-2 1 1 0 000 2z"></path>
+                      </svg>
+                    </summary>
+                    <details-menu class="SelectMenu" id="toc-details" style="display: none;">
+                      <div class="SelectMenu-modal rounded-3 mt-1" style="max-height: 340px;">
+                        <div class="SelectMenu-list SelectMenu-list--borderless p-2" style="overscroll-behavior: contain;" id="toc-list">
+                        </div>
+                      </div>
+                    </details-menu>
+                      2657 Words
+                    
+
+                  </div>
+                  <div class="file-actions flex-order-2 pt-0">
+                    
+                  </div>
+                </div>
+              </div>
+
+
+              <div class="Box-body px-5 pb-5" style="z-index: 1">
+                <article class="markdown-body entry-content container-lg"><p>MIT s6.081课程笔记及实验</p>
+<h1 id="lec04-page-tables">Lec04 Page tables</h1>
+<ul>
+<li>
+<p>隔离性是讨论虚拟内存的主要原因</p>
+</li>
+<li>
+<p>如果所有程序直接操作物理内存，一个程序就可以轻易地访问或修改其他程序内存中的数据</p>
+</li>
+<li>
+<p>解决这个问题的一个方法就是地址空间，让每个程序有独立的内存空间</p>
+</li>
+<li>
+<p>pagetable保存在内存中，这个内存的地址保存在SATP寄存器中，MMU从SATP寄存器中得到pagetable的地址</p>
+</li>
+<li>
+<p>每个应用程序（进程）都有自己独立的pagetable，当切换进程的时候，也需要切换SATP寄存器的内容，指向新进程pagetable的地址</p>
+</li>
+<li>
+<p>从CPU的角度来说，一旦MMU打开了，它执行的每条指令中的地址都是虚拟内存地址</p>
+</li>
+<li>
+<p>如果对于每个虚拟地址，在pagetable中都维护一个条目，占用的内存太大，所有的内存都会被pagetable占用</p>
+</li>
+<li>
+<p>不为每个地址创建一个条目，而是为每个page创建一个条目</p>
+</li>
+<li>
+<p>对于虚拟地址，将它划分为index和offset，index用来查找page，offset对应的是一个page中的哪个字节</p>
+<p><img src="https://blog-image-hugo.oss-cn-hangzhou.aliyuncs.com/202309231002699.png" alt="img"></p>
+</li>
+<li>
+<p>虚拟内存地址都是64bit，但不是所有的64bit都被使用了，高25bit并没有被使用。虚拟内存地址的数量现在只有2^39个，大概是512GB。在剩下的39bit中，有27bit被用来当做index，12bit被用来当做offset。offset必须是12bit，因为对应了一个page的4096个字节。</p>
+</li>
+<li>
+<p>物理内存地址是56bit，其中44bit是物理page号（PPN，Physical Page Number），剩下12bit是完全继承自虚拟内存地址中的offset</p>
+</li>
+<li>
+<p>按照以上方法进行地址转换的情况下，每个page table最多会有2^27个条目，如果每个进程都使用这么大的page table，进程需要为page table消耗大量的内存，并且很快物理内存就会耗尽。</p>
+</li>
+<li>
+<p>虚拟内存地址中的27bit的index，实际上是由3个9bit的数字组成（L2，L1，L0），L2用于找到第一级pagetable，一个pagetable占4KB，pagetable中的一个条目被称为PTE（Page Table Entry），占64bit，也就是8B。所以一个pagetable拥有512个PTE。</p>
+<p><img src="https://blog-image-hugo.oss-cn-hangzhou.aliyuncs.com/202309231017316.png" alt="img"></p>
+</li>
+<li>
+<p>SATP寄存器会指向最高一级的pagetable的物理内存地址，之后用L2来索引最高一级的pagetable中的PTE，得到一个PPN，也就是物理page号。这个PPN指向了中间级的pagetable。用L1来索引最中间级的pagetable中的PTE，得到一个PPN，用L0来索引最低级的pagetable中的PTE，得到一个PPN，将PPN与虚拟地址中的offset拼接起来得到最终的物理地址。</p>
+</li>
+<li>
+<p>每个PTE的低10bit是一堆标志位：第一个标志位是Valid。如果Valid bit位为1，那么表明这是一条合法的PTE，可以进行地址翻译。下两个标志位分别是Readable和Writable。表明你是否可以读/写这个page。Executable表明你可以从这个page执行指令。User表明这个page可以被运行在用户空间的进程访问。</p>
+</li>
+<li>
+<p>每次翻译一条虚拟地址的时候，都需要访问三次内存，代价变高。所以处理器会对地址的翻译结果缓存，这个缓存被称为：Translation Lookside Buffer，缩写TLB。基本上来说，这就是Page Table Entry的缓存，也就是PTE的缓存。</p>
+</li>
+<li>
+<p>当翻译的虚拟地址存在于TLB中时，会直接返回物理地址，不需要进行三次访存</p>
+</li>
+</ul>
+<h1 id="lab3">Lab3</h1>
+<h1 id="print-a-page-table">Print a page table</h1>
+<table><tr><td bgcolor=#DCEFDD>定义一个名为vmprint()的函数。它应当接收一个pagetable_t作为参数，并以下面描述的格式打印该页表。在exec.c中的return argc之前插入if(p->pid==1) vmprint(p->pagetable)，以打印第一个进程的页表。如果你通过了pte printout测试的make grade，你将获得此作业的满分。</td></tr></table>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// kernel/vm.c
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">static</span> <span class="kt">void</span> 
+</span></span><span class="line"><span class="cl"><span class="nf">print_pagetable_dfs</span><span class="p">(</span><span class="kt">pagetable_t</span> <span class="n">pagetable</span><span class="p">,</span> <span class="kt">int</span> <span class="n">depth</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span><span class="p">(</span><span class="n">depth</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">512</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">pte_t</span> <span class="n">pte</span> <span class="o">=</span> <span class="n">pagetable</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">pte</span> <span class="o">&amp;</span> <span class="n">PTE_V</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">depth</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;.. &#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;..%d: pte %p pa %p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">pte</span><span class="p">,</span> <span class="nf">PTE2PA</span><span class="p">(</span><span class="n">pte</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">print_pagetable_dfs</span><span class="p">((</span><span class="kt">pagetable_t</span><span class="p">)</span><span class="nf">PTE2PA</span><span class="p">(</span><span class="n">pte</span><span class="p">),</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span>
+</span></span><span class="line"><span class="cl"><span class="nf">vmprint</span><span class="p">(</span><span class="kt">pagetable_t</span> <span class="n">pagetable</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;page table %p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">pagetable</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">print_pagetable_dfs</span><span class="p">(</span><span class="n">pagetable</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// kernel/exec.c 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">if</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">pid</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">vmprint</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">pagetable</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">return</span> <span class="n">argc</span><span class="p">;</span>
+</span></span></code></pre></div><h1 id="a-kernel-page-table-per-process-hard">A kernel page table per process (hard)</h1>
+<table><tr><td bgcolor=#DCEFDD>你的第一项工作是修改内核来让每一个进程在内核中执行时使用它自己的内核页表的副本。修改struct proc来为每一个进程维护一个内核页表，修改调度程序使得切换进程时也切换内核页表。对于这个步骤，每个进程的内核页表都应当与现有的的全局内核页表完全一致。如果你的usertests程序正确运行了，那么你就通过了这个实验。</td></tr></table>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// /kernel/proc.h
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">uint64</span> <span class="n">kstack</span><span class="p">;</span>               <span class="c1">// Virtual address of kernel stack
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">uint64</span> <span class="n">sz</span><span class="p">;</span>                   <span class="c1">// Size of process memory (bytes)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">pagetable_t</span> <span class="n">pagetable</span><span class="p">;</span>       <span class="c1">// User page table
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">pagetable_t</span> <span class="n">kernelpt</span><span class="p">;</span>      <span class="c1">// 进程的内核页表
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">struct</span> <span class="n">trapframe</span> <span class="o">*</span><span class="n">trapframe</span><span class="p">;</span> <span class="c1">// data page for trampoline.S
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">// kernel/vm.c
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span>
+</span></span><span class="line"><span class="cl"><span class="nf">uvmmap</span><span class="p">(</span><span class="kt">pagetable_t</span> <span class="n">pagetable</span><span class="p">,</span> <span class="n">uint64</span> <span class="n">va</span><span class="p">,</span> <span class="n">uint64</span> <span class="n">pa</span><span class="p">,</span> <span class="n">uint64</span> <span class="n">sz</span><span class="p">,</span> <span class="kt">int</span> <span class="n">perm</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span><span class="p">(</span><span class="nf">mappages</span><span class="p">(</span><span class="n">pagetable</span><span class="p">,</span> <span class="n">va</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">pa</span><span class="p">,</span> <span class="n">perm</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">panic</span><span class="p">(</span><span class="s">&#34;uvmmap&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="cm">/*
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * create a direct-map page table for the process in kernel.
+</span></span></span><span class="line"><span class="cl"><span class="cm"> */</span>
+</span></span><span class="line"><span class="cl"><span class="kt">pagetable_t</span>
+</span></span><span class="line"><span class="cl"><span class="nf">proc_kpgtb_init</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">pagetable_t</span> <span class="n">kernel_pagetable</span> <span class="o">=</span> <span class="nf">uvmcreate</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span><span class="n">kernel_pagetable</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">memset</span><span class="p">(</span><span class="n">kernel_pagetable</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">PGSIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// uart registers
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">uvmmap</span><span class="p">(</span><span class="n">kernel_pagetable</span><span class="p">,</span> <span class="n">UART0</span><span class="p">,</span> <span class="n">UART0</span><span class="p">,</span> <span class="n">PGSIZE</span><span class="p">,</span> <span class="n">PTE_R</span> <span class="o">|</span> <span class="n">PTE_W</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// virtio mmio disk interface
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">uvmmap</span><span class="p">(</span><span class="n">kernel_pagetable</span><span class="p">,</span> <span class="n">VIRTIO0</span><span class="p">,</span> <span class="n">VIRTIO0</span><span class="p">,</span> <span class="n">PGSIZE</span><span class="p">,</span> <span class="n">PTE_R</span> <span class="o">|</span> <span class="n">PTE_W</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// CLINT
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">uvmmap</span><span class="p">(</span><span class="n">kernel_pagetable</span><span class="p">,</span> <span class="n">CLINT</span><span class="p">,</span> <span class="n">CLINT</span><span class="p">,</span> <span class="mh">0x10000</span><span class="p">,</span> <span class="n">PTE_R</span> <span class="o">|</span> <span class="n">PTE_W</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// PLIC
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">uvmmap</span><span class="p">(</span><span class="n">kernel_pagetable</span><span class="p">,</span> <span class="n">PLIC</span><span class="p">,</span> <span class="n">PLIC</span><span class="p">,</span> <span class="mh">0x400000</span><span class="p">,</span> <span class="n">PTE_R</span> <span class="o">|</span> <span class="n">PTE_W</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// map kernel text executable and read-only.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">uvmmap</span><span class="p">(</span><span class="n">kernel_pagetable</span><span class="p">,</span> <span class="n">KERNBASE</span><span class="p">,</span> <span class="n">KERNBASE</span><span class="p">,</span> <span class="p">(</span><span class="n">uint64</span><span class="p">)</span><span class="n">etext</span><span class="o">-</span><span class="n">KERNBASE</span><span class="p">,</span> <span class="n">PTE_R</span> <span class="o">|</span> <span class="n">PTE_X</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// map kernel data and the physical RAM we&#39;ll make use of.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">uvmmap</span><span class="p">(</span><span class="n">kernel_pagetable</span><span class="p">,</span> <span class="p">(</span><span class="n">uint64</span><span class="p">)</span><span class="n">etext</span><span class="p">,</span> <span class="p">(</span><span class="n">uint64</span><span class="p">)</span><span class="n">etext</span><span class="p">,</span> <span class="n">PHYSTOP</span><span class="o">-</span><span class="p">(</span><span class="n">uint64</span><span class="p">)</span><span class="n">etext</span><span class="p">,</span> <span class="n">PTE_R</span> <span class="o">|</span> <span class="n">PTE_W</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// map the trampoline for trap entry/exit to
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// the highest virtual address in the kernel.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="nf">uvmmap</span><span class="p">(</span><span class="n">kernel_pagetable</span><span class="p">,</span> <span class="n">TRAMPOLINE</span><span class="p">,</span> <span class="p">(</span><span class="n">uint64</span><span class="p">)</span><span class="n">trampoline</span><span class="p">,</span> <span class="n">PGSIZE</span><span class="p">,</span> <span class="n">PTE_R</span> <span class="o">|</span> <span class="n">PTE_X</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">kernel_pagetable</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// kernel/proc.c:allocproc
+</span></span></span><span class="line"><span class="cl"><span class="c1">// An empty user page table.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">p</span><span class="o">-&gt;</span><span class="n">pagetable</span> <span class="o">=</span> <span class="nf">proc_pagetable</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">pagetable</span> <span class="o">==</span> <span class="mi">0</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">freeproc</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">release</span><span class="p">(</span><span class="o">&amp;</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">lock</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 以下代码为新增的代码
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">p</span><span class="o">-&gt;</span><span class="n">kernel_pagetable</span> <span class="o">=</span> <span class="nf">proc_kpgtb_init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">kernel_pagetable</span> <span class="o">==</span> <span class="mi">0</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">freeproc</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">release</span><span class="p">(</span><span class="o">&amp;</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">lock</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Allocate a page for the process&#39;s kernel stack.
+</span></span></span><span class="line"><span class="cl"><span class="c1">// Map it high in memory, followed by an invalid
+</span></span></span><span class="line"><span class="cl"><span class="c1">// guard page.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">char</span> <span class="o">*</span><span class="n">pa</span> <span class="o">=</span> <span class="nf">kalloc</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="n">pa</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">panic</span><span class="p">(</span><span class="s">&#34;kalloc&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">uint64</span> <span class="n">va</span> <span class="o">=</span> <span class="nf">KSTACK</span><span class="p">((</span><span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="n">p</span> <span class="o">-</span> <span class="n">proc</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl"><span class="nf">uvmmap</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">kernel_pagetable</span><span class="p">,</span> <span class="n">va</span><span class="p">,</span> <span class="p">(</span><span class="n">uint64</span><span class="p">)</span><span class="n">pa</span><span class="p">,</span> <span class="n">PGSIZE</span><span class="p">,</span> <span class="n">PTE_R</span> <span class="o">|</span> <span class="n">PTE_W</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">p</span><span class="o">-&gt;</span><span class="n">kstack</span> <span class="o">=</span> <span class="n">va</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// kernel/vm.c
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span>
+</span></span><span class="line"><span class="cl"><span class="nf">proc_inithart</span><span class="p">(</span><span class="kt">pagetable_t</span> <span class="n">proc_pagetable</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">w_satp</span><span class="p">(</span><span class="nf">MAKE_SATP</span><span class="p">(</span><span class="n">proc_pagetable</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">sfence_vma</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// kernel/proc.c:scheduler
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">p</span><span class="o">-&gt;</span><span class="n">state</span> <span class="o">=</span> <span class="n">RUNNING</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="n">c</span><span class="o">-&gt;</span><span class="n">proc</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 新增
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">proc_inithart</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">kernelpt</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">swtch</span><span class="p">(</span><span class="o">&amp;</span><span class="n">c</span><span class="o">-&gt;</span><span class="n">context</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">context</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 新增
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">kvminithart</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// kernel/proc.c:freeproc
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">uvmunmap</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">kernel_pagetable</span><span class="p">,</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">kstack</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="n">p</span><span class="o">-&gt;</span><span class="n">kstack</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">kernel_pagetable</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">freeprocpgtb</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">kernel_pagetable</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// kernel/vm.c
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span>
+</span></span><span class="line"><span class="cl"><span class="nf">freeprocpgtb</span><span class="p">(</span><span class="kt">pagetable_t</span> <span class="n">pagetable</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// there are 2^9 = 512 PTEs in a page table.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">512</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">pte_t</span> <span class="n">pte</span> <span class="o">=</span> <span class="n">pagetable</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="n">pte</span> <span class="o">&amp;</span> <span class="n">PTE_V</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">      <span class="n">pagetable</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span><span class="p">((</span><span class="n">pte</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">PTE_R</span><span class="o">|</span><span class="n">PTE_W</span><span class="o">|</span><span class="n">PTE_X</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// this PTE points to a lower-level page table.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">uint64</span> <span class="n">child</span> <span class="o">=</span> <span class="nf">PTE2PA</span><span class="p">(</span><span class="n">pte</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">freeprocpgtb</span><span class="p">((</span><span class="kt">pagetable_t</span><span class="p">)</span><span class="n">child</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="nf">kfree</span><span class="p">((</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">pagetable</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// kernel/vm.c:kvmpa
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#include</span> <span class="cpf">&#34;spinlock.h&#34; </span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&#34;proc.h&#34;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span><span class="n">pte</span> <span class="o">=</span> <span class="nf">walk</span><span class="p">(</span><span class="nf">myproc</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">kernelpt</span><span class="p">,</span> <span class="n">va</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span></code></pre></div><h1 id="simplify-copyincopyinstr-hard">Simplify <code>copyin/copyinstr</code> (hard)</h1>
+<table><tr><td bgcolor=#DCEFDD>将定义在kernel/vm.c中的copyin的主题内容替换为对copyin_new的调用（在kernel/vmcopyin.c中定义）；对copyinstr和copyinstr_new执行相同的操作。为每个进程的内核页表添加用户地址映射，以便copyin_new和copyinstr_new工作。如果usertests正确运行并且所有make grade测试都通过，那么你就完成了此项作业。</td></tr></table>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// /kernel/vm.c
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span>
+</span></span><span class="line"><span class="cl"><span class="nf">u2kvmcopy</span><span class="p">(</span><span class="kt">pagetable_t</span> <span class="n">pagetable</span><span class="p">,</span> <span class="kt">pagetable_t</span> <span class="n">kernelpt</span><span class="p">,</span> <span class="n">uint64</span> <span class="n">oldsz</span><span class="p">,</span> <span class="n">uint64</span> <span class="n">newsz</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">  <span class="kt">pte_t</span> <span class="o">*</span><span class="n">pte_from</span><span class="p">,</span> <span class="o">*</span><span class="n">pte_to</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">oldsz</span> <span class="o">=</span> <span class="nf">PGROUNDUP</span><span class="p">(</span><span class="n">oldsz</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">for</span> <span class="p">(</span><span class="n">uint64</span> <span class="n">i</span> <span class="o">=</span> <span class="n">oldsz</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">newsz</span><span class="p">;</span> <span class="n">i</span> <span class="o">+=</span> <span class="n">PGSIZE</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">((</span><span class="n">pte_from</span> <span class="o">=</span> <span class="nf">walk</span><span class="p">(</span><span class="n">pagetable</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">panic</span><span class="p">(</span><span class="s">&#34;u2kvmcopy: src pte does not exist&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">((</span><span class="n">pte_to</span> <span class="o">=</span> <span class="nf">walk</span><span class="p">(</span><span class="n">kernelpt</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="nf">panic</span><span class="p">(</span><span class="s">&#34;u2kvmcopy: pte walk failed&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">uint64</span> <span class="n">pa</span> <span class="o">=</span> <span class="nf">PTE2PA</span><span class="p">(</span><span class="o">*</span><span class="n">pte_from</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// clear PTE_U in flag to access this pte in kernel
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">uint</span> <span class="n">flags</span> <span class="o">=</span> <span class="p">(</span><span class="nf">PTE_FLAGS</span><span class="p">(</span><span class="o">*</span><span class="n">pte_from</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="n">PTE_U</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">*</span><span class="n">pte_to</span> <span class="o">=</span> <span class="nf">PA2PTE</span><span class="p">(</span><span class="n">pa</span><span class="p">)</span> <span class="o">|</span> <span class="n">flags</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// /kernel/exec.c
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">stackbase</span> <span class="o">=</span> <span class="n">sp</span> <span class="o">-</span> <span class="n">PGSIZE</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">u2kvmcopy</span><span class="p">(</span><span class="n">pagetable</span><span class="p">,</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">kernel_pagetable</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sz</span><span class="p">);</span> <span class="c1">// 新增
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">// Push argument strings, prepare rest of stack in ustack.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">for</span><span class="p">(</span><span class="n">argc</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">argv</span><span class="p">[</span><span class="n">argc</span><span class="p">];</span> <span class="n">argc</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl"><span class="c1">// /kernel/proc.c:fork
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">np</span><span class="o">-&gt;</span><span class="n">sz</span> <span class="o">=</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">sz</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">u2kvmcopy</span><span class="p">(</span><span class="n">np</span><span class="o">-&gt;</span><span class="n">pagetable</span><span class="p">,</span> <span class="n">np</span><span class="o">-&gt;</span><span class="n">kernel_pagetable</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">-&gt;</span><span class="n">sz</span><span class="p">);</span>  <span class="c1">//新增
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="n">np</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl"><span class="c1">// kernel/proc.c:growproc
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">int</span>
+</span></span><span class="line"><span class="cl"><span class="nf">growproc</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">uint</span> <span class="n">sz</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">struct</span> <span class="n">proc</span> <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="nf">myproc</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="n">sz</span> <span class="o">=</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">sz</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span><span class="p">(</span><span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">(</span><span class="nf">PGROUNDUP</span><span class="p">(</span><span class="n">sz</span> <span class="o">+</span> <span class="n">n</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">PLIC</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="p">((</span><span class="n">sz</span> <span class="o">=</span> <span class="nf">uvmalloc</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">pagetable</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">sz</span> <span class="o">+</span> <span class="n">n</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">u2kvmcopy</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">pagetable</span><span class="p">,</span> <span class="n">p</span><span class="o">-&gt;</span><span class="n">kernel_pagetable</span><span class="p">,</span> <span class="n">sz</span> <span class="o">-</span> <span class="n">n</span><span class="p">,</span> <span class="n">sz</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">n</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">){</span>
+</span></span><span class="line"><span class="cl">    <span class="n">sz</span> <span class="o">=</span> <span class="nf">uvmdealloc</span><span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">pagetable</span><span class="p">,</span> <span class="n">sz</span><span class="p">,</span> <span class="n">sz</span> <span class="o">+</span> <span class="n">n</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">p</span><span class="o">-&gt;</span><span class="n">sz</span> <span class="o">=</span> <span class="n">sz</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl"><span class="c1">// /kernel/vm.c
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">int</span>
+</span></span><span class="line"><span class="cl"><span class="nf">copyin</span><span class="p">(</span><span class="kt">pagetable_t</span> <span class="n">pagetable</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">dst</span><span class="p">,</span> <span class="n">uint64</span> <span class="n">srcva</span><span class="p">,</span> <span class="n">uint64</span> <span class="n">len</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nf">copyin_new</span><span class="p">(</span><span class="n">pagetable</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">srcva</span><span class="p">,</span> <span class="n">len</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span>
+</span></span><span class="line"><span class="cl"><span class="nf">copyinstr</span><span class="p">(</span><span class="kt">pagetable_t</span> <span class="n">pagetable</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">dst</span><span class="p">,</span> <span class="n">uint64</span> <span class="n">srcva</span><span class="p">,</span> <span class="n">uint64</span> <span class="n">max</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="nf">copyinstr_new</span><span class="p">(</span><span class="n">pagetable</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">srcva</span><span class="p">,</span> <span class="n">max</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl"><span class="c1">// /kernel/defs.h
+</span></span></span><span class="line"><span class="cl"><span class="c1">// vmcopyin.c
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">int</span>             <span class="nf">copyin_new</span><span class="p">(</span><span class="kt">pagetable_t</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="p">,</span> <span class="n">uint64</span><span class="p">,</span> <span class="n">uint64</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span>             <span class="nf">copyinstr_new</span><span class="p">(</span><span class="kt">pagetable_t</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="p">,</span> <span class="n">uint64</span><span class="p">,</span> <span class="n">uint64</span><span class="p">);</span>
+</span></span></code></pre></div></article>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script type="application/javascript" src='https://blog.hhui.me/js/toc.js'></script>
+<link rel="stylesheet" href='https://blog.hhui.me/css/toc.css' />
+
+
+  <div class="footer container-xl width-full p-responsive">
+  <div
+    class="position-relative d-flex flex-row-reverse flex-lg-row flex-wrap flex-lg-nowrap flex-justify-center flex-lg-justify-between flex-sm-items-center pt-6 pb-2 mt-6 f6 text-gray border-top border-gray-light ">
+    <a aria-label="Homepage" title="GitHub" class="footer-octicon d-none d-lg-block mr-lg-4" href="https://blog.hhui.me">
+      <svg height="24" class="octicon octicon-mark-github" viewBox="0 0 16 16" version="1.1" width="24">
+        <path fill-rule="evenodd"
+          d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+        </path>
+      </svg>
+    </a>
+    <ul class="list-style-none d-flex flex-wrap col-12 flex-justify-center flex-lg-justify-between mb-2 mb-lg-0">
+      
+      <li class="mr-3 mr-lg-0">Theme by <a href='https://github.com/MeiK2333/github-style'>github-style</a></li>
+      
+    </ul>
+  </div>
+  <div class="d-flex flex-justify-center pb-6">
+    <span class="f6 text-gray-light"></span>
+  </div>
+
+
+</div>
+</body>
+
+<script type="application/javascript" src="https://blog.hhui.me/js/github-style.js"></script>
+
+
+
+
+</html>
