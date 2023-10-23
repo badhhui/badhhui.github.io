@@ -6,7 +6,16 @@
     <description>Recent content on Hhui&#39;s blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <lastBuildDate>Fri, 22 Sep 2023 20:15:43 +0800</lastBuildDate><atom:link href="https://blog.hhui.me/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 23 Oct 2023 10:59:27 +0800</lastBuildDate><atom:link href="https://blog.hhui.me/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>从F2FS的IO流程中理解fscrypt</title>
+      <link>https://blog.hhui.me/post/%E4%BB%8Ef2fs%E7%9A%84io%E6%B5%81%E7%A8%8B%E4%B8%AD%E7%90%86%E8%A7%A3fscrypt/</link>
+      <pubDate>Mon, 23 Oct 2023 10:59:27 +0800</pubDate>
+      
+      <guid>https://blog.hhui.me/post/%E4%BB%8Ef2fs%E7%9A%84io%E6%B5%81%E7%A8%8B%E4%B8%AD%E7%90%86%E8%A7%A3fscrypt/</guid>
+      <description>&lt;p&gt;本文以&lt;code&gt;F2FS&lt;/code&gt;的代码为切入点，通过几个通用的IO操作过程讲解&lt;code&gt;fscrypt&lt;/code&gt;的代码&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>MIT s6.081 lab3</title>
       <link>https://blog.hhui.me/post/mit_s6.081_lab3/</link>

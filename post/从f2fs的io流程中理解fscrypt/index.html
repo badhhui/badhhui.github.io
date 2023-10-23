@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <script type="application/javascript" src='https://blog.hhui.me/js/theme-mode.js'></script>
+    <link rel="stylesheet" href='https://blog.hhui.me/css/frameworks.min.css' />
+    <link rel="stylesheet" href='https://blog.hhui.me/css/github.min.css' />
+    <link rel="stylesheet" href='https://blog.hhui.me/css/github-style.css' />
+    <link rel="stylesheet" href='https://blog.hhui.me/css/light.css' />
+    <link rel="stylesheet" href='https://blog.hhui.me/css/dark.css' />
+    <link rel="stylesheet" href='https://blog.hhui.me/css/syntax.css' />
+    <title>从F2FS的IO流程中理解fscrypt - Hhui&#39;s blog</title>
+    
+    <link rel="icon" type="image/x-icon" href='/images/github.png'>
+    
+    <meta name="theme-color" content="#1e2327">
+
+    
+    <meta name="description"
+  content="本文以F2FS的代码为切入点，通过几个通用的IO操作过程讲解fscrypt的代码
+" />
+<meta name="keywords"
+  content='blog, google analytics' />
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="https://blog.hhui.me/post/%E4%BB%8Ef2fs%E7%9A%84io%E6%B5%81%E7%A8%8B%E4%B8%AD%E7%90%86%E8%A7%A3fscrypt/" />
+
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="从F2FS的IO流程中理解fscrypt - Hhui&#39;s blog" />
+<meta name="twitter:description"
+  content="本文以F2FS的代码为切入点，通过几个通用的IO操作过程讲解fscrypt的代码
+" />
+<meta name="twitter:site" content="https://blog.hhui.me" />
+<meta name="twitter:creator" content="" />
+<meta name="twitter:image"
+  content="https://blog.hhui.me">
+
+
+<meta property="og:type" content="article" />
+<meta property="og:title" content="从F2FS的IO流程中理解fscrypt - Hhui&#39;s blog">
+<meta property="og:description"
+  content="本文以F2FS的代码为切入点，通过几个通用的IO操作过程讲解fscrypt的代码
+" />
+<meta property="og:url" content="https://blog.hhui.me/post/%E4%BB%8Ef2fs%E7%9A%84io%E6%B5%81%E7%A8%8B%E4%B8%AD%E7%90%86%E8%A7%A3fscrypt/" />
+<meta property="og:site_name" content="从F2FS的IO流程中理解fscrypt" />
+<meta property="og:image"
+  content="https://blog.hhui.me">
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+<meta property="article:published_time" content="2023-10-23 10:59:27 &#43;0800 CST" />
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body>
+  <div style="position: relative">
+  <header class="Header js-details-container Details px-3 px-md-4 px-lg-5 flex-wrap flex-md-nowrap open Details--on">
+    <div class="Header-item mobile-none" style="margin-top: -4px; margin-bottom: -4px;">
+      <a class="Header-link" href="https://blog.hhui.me">
+        <svg class="octicon" height="32" viewBox="0 0 16 16" version="1.1" width="32">
+          <path fill-rule="evenodd"
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+          </path>
+        </svg>
+      </a>
+    </div>
+    <div class="Header-item d-md-none">
+      <button class="Header-link btn-link js-details-target" type="button"
+        onclick="document.querySelector('#header-search').style.display = document.querySelector('#header-search').style.display == 'none'? 'block': 'none'">
+        <svg height="24" class="octicon octicon-three-bars" viewBox="0 0 16 16" version="1.1" width="24">
+          <path fill-rule="evenodd"
+            d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z">
+          </path>
+        </svg>
+      </button>
+    </div>
+    <div style="display: none;" id="header-search"
+      class="Header-item Header-item--full flex-column flex-md-row width-full flex-order-2 flex-md-order-none mr-0 mr-md-3 mt-3 mt-md-0 Details-content--hidden-not-important d-md-flex">
+      <div
+        class="Header-search header-search flex-auto js-site-search position-relative flex-self-stretch flex-md-self-auto mb-3 mb-md-0 mr-0 mr-md-3 scoped-search site-scoped-search js-jump-to">
+        <div class="position-relative">
+          <form target="_blank" action="https://www.google.com/search" accept-charset="UTF-8" method="get"
+            autocomplete="off">
+            <label
+              class="Header-search-label form-control input-sm header-search-wrapper p-0 js-chromeless-input-container header-search-wrapper-jump-to position-relative d-flex flex-justify-between flex-items-center">
+              <input type="text"
+                class="Header-search-input form-control input-sm header-search-input jump-to-field js-jump-to-field js-site-search-focus js-site-search-field is-clearable"
+                name="q" value="" placeholder="Search" autocomplete="off">
+              <input type="hidden" name="q" value="site:https://blog.hhui.me">
+            </label>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="Header-item Header-item--full flex-justify-center d-md-none position-relative">
+      <a class="Header-link " href="https://blog.hhui.me">
+        <svg class="octicon octicon-mark-github v-align-middle" height="32" viewBox="0 0 16 16" version="1.1"
+          width="32">
+          <path fill-rule="evenodd"
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+          </path>
+        </svg>
+      </a>
+    </div>
+    <div class="Header-item" style="margin-right: 0;">
+      <a href="javascript:void(0)" class="Header-link no-select" onclick="switchTheme()">
+        <svg style="fill: var(--color-profile-color-modes-toggle-moon);" class="no-select" viewBox="0 0 16 16"
+          version="1.1" width="16" height="16">
+          <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M4.52208 7.71754C7.5782 7.71754 10.0557 5.24006 10.0557 2.18394C10.0557 1.93498 10.0392 1.68986 10.0074 1.44961C9.95801 1.07727 10.3495 0.771159 10.6474 0.99992C12.1153 2.12716 13.0615 3.89999 13.0615 5.89383C13.0615 9.29958 10.3006 12.0605 6.89485 12.0605C3.95334 12.0605 1.49286 10.001 0.876728 7.24527C0.794841 6.87902 1.23668 6.65289 1.55321 6.85451C2.41106 7.40095 3.4296 7.71754 4.52208 7.71754Z">
+          </path>
+        </svg>
+      </a>
+    </div>
+  </header>
+</div>
+  
+<div>
+  <main>
+    <div class="gisthead pagehead bg-gray-light pb-0 pt-3 mb-4">
+      <div class="px-0">
+        <div class="mb-3 d-flex px-3 px-md-3 px-lg-5">
+          <div class="flex-auto min-width-0 width-fit mr-3">
+            <div class="d-flex">
+              <div class="d-none d-md-block">
+                <a class="avatar mr-2 flex-shrink-0" href="https://blog.hhui.me">
+                  <img class=" avatar-user"
+                    src="https://blog.hhui.me/images/avatar.png"
+                    width="32" height="32"></a>
+              </div>
+              <div class="d-flex flex-column">
+                <h1 class="break-word f3 text-normal mb-md-0 mb-1">
+                  <span class="author">
+                    <a href="https://blog.hhui.me">Hhui</a></span><span
+                    class="path-divider">/</span><strong class="css-truncate-target mr-1" style="max-width: 410px"><a
+                      href="https://blog.hhui.me/post/%E4%BB%8Ef2fs%E7%9A%84io%E6%B5%81%E7%A8%8B%E4%B8%AD%E7%90%86%E8%A7%A3fscrypt/">从F2FS的IO流程中理解fscrypt</a></strong>
+                </h1>
+                <div class="note m-0">
+                  Created <relative-time datetime="Mon, 23 Oct 2023 10:59:27 &#43;0800"
+                    class="no-wrap">
+                    Mon, 23 Oct 2023 10:59:27 &#43;0800</relative-time>
+
+                  
+                  <span class="file-info-divider"></span>
+                  Modified <relative-time datetime="Mon, 23 Oct 2023 11:04:49 &#43;0800"
+                    class="no-wrap">
+                    Mon, 23 Oct 2023 11:04:49 &#43;0800</relative-time>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-lg px-3 new-discussion-timeline">
+      <div class="repository-content gist-content">
+        <div>
+          <div class="js-gist-file-update-container js-task-list-container file-box">
+            <div id="file-pytest" class="file my-2">
+              <div id="post-header" class="file-header d-flex flex-md-items-center flex-items-start sticky-header" style="z-index: 2">
+                <div class="file-info d-flex flex-md-items-center flex-items-start flex-order-1 flex-auto">
+                  <div class="text-mono f6 flex-auto pr-3 flex-order-2 flex-md-order-1 mt-2 mt-md-0">
+                    
+                    <summary id="toc-toggle" onclick="clickToc()" class="btn btn-octicon m-0 mr-2 p-2">
+                      <svg aria-hidden="true" viewBox="0 0 16 16" height="16" width="16" class="octicon octicon-list-unordered">
+                        <path fill-rule="evenodd" d="M2 4a1 1 0 100-2 1 1 0 000 2zm3.75-1.5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zm0 5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zm0 5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zM3 8a1 1 0 11-2 0 1 1 0 012 0zm-1 6a1 1 0 100-2 1 1 0 000 2z"></path>
+                      </svg>
+                    </summary>
+                    <details-menu class="SelectMenu" id="toc-details" style="display: none;">
+                      <div class="SelectMenu-modal rounded-3 mt-1" style="max-height: 340px;">
+                        <div class="SelectMenu-list SelectMenu-list--borderless p-2" style="overscroll-behavior: contain;" id="toc-list">
+                        </div>
+                      </div>
+                    </details-menu>
+                      5525 Words
+                    
+
+                  </div>
+                  <div class="file-actions flex-order-2 pt-0">
+                    
+                    
+                    <a class="muted-link mr-3" href="/tags/f2fs">
+                      <svg class="octicon octicon-tag" viewBox="0 0 16 16" version="1.1" width="16" height="16">
+                        <path fill-rule="evenodd"
+                          d="M2.5 7.775V2.75a.25.25 0 01.25-.25h5.025a.25.25 0 01.177.073l6.25 6.25a.25.25 0 010 .354l-5.025 5.025a.25.25 0 01-.354 0l-6.25-6.25a.25.25 0 01-.073-.177zm-1.5 0V2.75C1 1.784 1.784 1 2.75 1h5.025c.464 0 .91.184 1.238.513l6.25 6.25a1.75 1.75 0 010 2.474l-5.026 5.026a1.75 1.75 0 01-2.474 0l-6.25-6.25A1.75 1.75 0 011 7.775zM6 5a1 1 0 100 2 1 1 0 000-2z">
+                        </path>
+                      </svg>
+                      F2FS
+                    </a>
+                    
+                    <a class="muted-link mr-3" href="/tags/fscrypt">
+                      <svg class="octicon octicon-tag" viewBox="0 0 16 16" version="1.1" width="16" height="16">
+                        <path fill-rule="evenodd"
+                          d="M2.5 7.775V2.75a.25.25 0 01.25-.25h5.025a.25.25 0 01.177.073l6.25 6.25a.25.25 0 010 .354l-5.025 5.025a.25.25 0 01-.354 0l-6.25-6.25a.25.25 0 01-.073-.177zm-1.5 0V2.75C1 1.784 1.784 1 2.75 1h5.025c.464 0 .91.184 1.238.513l6.25 6.25a1.75 1.75 0 010 2.474l-5.026 5.026a1.75 1.75 0 01-2.474 0l-6.25-6.25A1.75 1.75 0 011 7.775zM6 5a1 1 0 100 2 1 1 0 000-2z">
+                        </path>
+                      </svg>
+                      fscrypt
+                    </a>
+                    
+                    <a class="muted-link mr-3" href="/tags/linux">
+                      <svg class="octicon octicon-tag" viewBox="0 0 16 16" version="1.1" width="16" height="16">
+                        <path fill-rule="evenodd"
+                          d="M2.5 7.775V2.75a.25.25 0 01.25-.25h5.025a.25.25 0 01.177.073l6.25 6.25a.25.25 0 010 .354l-5.025 5.025a.25.25 0 01-.354 0l-6.25-6.25a.25.25 0 01-.073-.177zm-1.5 0V2.75C1 1.784 1.784 1 2.75 1h5.025c.464 0 .91.184 1.238.513l6.25 6.25a1.75 1.75 0 010 2.474l-5.026 5.026a1.75 1.75 0 01-2.474 0l-6.25-6.25A1.75 1.75 0 011 7.775zM6 5a1 1 0 100 2 1 1 0 000-2z">
+                        </path>
+                      </svg>
+                      Linux
+                    </a>
+                    
+                    
+                  </div>
+                </div>
+              </div>
+
+
+              <div class="Box-body px-5 pb-5" style="z-index: 1">
+                <article class="markdown-body entry-content container-lg"><p>本文以<code>F2FS</code>的代码为切入点，通过几个通用的IO操作过程讲解<code>fscrypt</code>的代码</p>
+<h2 id="从f2fs的io流程中理解fscrypt">从F2FS的I/O流程中理解fscrypt</h2>
+<h3 id="内核版本-419">内核版本: 4.19</h3>
+<h3 id="create">create</h3>
+<h4 id="f2fs_create">f2fs_create</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="nf">f2fs_create</span><span class="p">(</span><span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">dir</span><span class="p">,</span> <span class="k">struct</span> <span class="n">dentry</span> <span class="o">*</span><span class="n">dentry</span><span class="p">,</span> <span class="kt">umode_t</span> <span class="n">mode</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">						<span class="kt">bool</span> <span class="n">excl</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">f2fs_sb_info</span> <span class="o">*</span><span class="n">sbi</span> <span class="o">=</span> <span class="nf">F2FS_I_SB</span><span class="p">(</span><span class="n">dir</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">inode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">nid_t</span> <span class="n">ino</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">int</span> <span class="n">err</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="n">inode</span> <span class="o">=</span> <span class="nf">f2fs_new_inode</span><span class="p">(</span><span class="n">dir</span><span class="p">,</span> <span class="n">mode</span><span class="p">);</span> <span class="c1">// 创建f2fs特定的inode结构
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="n">inode</span><span class="o">-&gt;</span><span class="n">i_op</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">f2fs_file_inode_operations</span><span class="p">;</span> <span class="c1">// 然后赋值对应的函数指针
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">inode</span><span class="o">-&gt;</span><span class="n">i_fop</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">f2fs_file_operations</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">inode</span><span class="o">-&gt;</span><span class="n">i_mapping</span><span class="o">-&gt;</span><span class="n">a_ops</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">f2fs_dblock_aops</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">ino</span> <span class="o">=</span> <span class="n">inode</span><span class="o">-&gt;</span><span class="n">i_ino</span><span class="p">;</span> <span class="c1">// 记录该inode的ino
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="n">err</span> <span class="o">=</span> <span class="nf">f2fs_add_link</span><span class="p">(</span><span class="n">dentry</span><span class="p">,</span> <span class="n">inode</span><span class="p">);</span> <span class="c1">// 将该inode链接到用户传入的父目录dir中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="p">(</span><span class="n">err</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="k">goto</span> <span class="n">out</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nf">f2fs_alloc_nid_done</span><span class="p">(</span><span class="n">sbi</span><span class="p">,</span> <span class="n">ino</span><span class="p">);</span> <span class="c1">// 在f2fs_new_inode函数内分配了ino，在这里完成最后一步
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h4 id="f2fs_add_link">f2fs_add_link</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kr">inline</span> <span class="kt">int</span> <span class="nf">f2fs_add_link</span><span class="p">(</span><span class="k">struct</span> <span class="n">dentry</span> <span class="o">*</span><span class="n">dentry</span><span class="p">,</span> <span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">inode</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 这里的dentry就是新inode的dentry
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">return</span> <span class="nf">f2fs_do_add_link</span><span class="p">(</span><span class="nf">d_inode</span><span class="p">(</span><span class="n">dentry</span><span class="o">-&gt;</span><span class="n">d_parent</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">dentry</span><span class="o">-&gt;</span><span class="n">d_name</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				<span class="n">inode</span><span class="p">,</span> <span class="n">inode</span><span class="o">-&gt;</span><span class="n">i_ino</span><span class="p">,</span> <span class="n">inode</span><span class="o">-&gt;</span><span class="n">i_mode</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h4 id="f2fs_do_add_link">f2fs_do_add_link</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="c1">// dir是父目录
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">int</span> <span class="nf">f2fs_do_add_link</span><span class="p">(</span><span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">dir</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="n">qstr</span> <span class="o">*</span><span class="n">name</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				<span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">inode</span><span class="p">,</span> <span class="kt">nid_t</span> <span class="n">ino</span><span class="p">,</span> <span class="kt">umode_t</span> <span class="n">mode</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">f2fs_dir_entry</span> <span class="o">*</span><span class="n">de</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span> <span class="c1">// 父目录dir的目录项，初始化为NULL
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="kt">int</span> <span class="n">err</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 如果文件已经加密，则获得解密后的名字fname
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">err</span> <span class="o">=</span> <span class="nf">fscrypt_setup_filename</span><span class="p">(</span><span class="n">dir</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">fname</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">de</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 如果找到目录项
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="nf">f2fs_put_page</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="n">err</span> <span class="o">=</span> <span class="o">-</span><span class="n">EEXIST</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nf">IS_ERR</span><span class="p">(</span><span class="n">page</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="n">err</span> <span class="o">=</span> <span class="nf">PTR_ERR</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="c1">// 对于一个新inode，它对应的父目录的目录项f2fs_dir_entry应该是不存在的
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="n">err</span> <span class="o">=</span> <span class="nf">f2fs_add_dentry</span><span class="p">(</span><span class="n">dir</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">fname</span><span class="p">,</span> <span class="n">inode</span><span class="p">,</span> <span class="n">ino</span><span class="p">,</span> <span class="n">mode</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="n">err</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h4 id="f2fs_add_dentry">f2fs_add_dentry</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">f2fs_add_dentry</span><span class="p">(</span><span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">dir</span><span class="p">,</span> <span class="k">struct</span> <span class="n">fscrypt_name</span> <span class="o">*</span><span class="n">fname</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				<span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">inode</span><span class="p">,</span> <span class="kt">nid_t</span> <span class="n">ino</span><span class="p">,</span> <span class="kt">umode_t</span> <span class="n">mode</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">qstr</span> <span class="n">new_name</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">int</span> <span class="n">err</span> <span class="o">=</span> <span class="o">-</span><span class="n">EAGAIN</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="n">new_name</span><span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="nf">fname_name</span><span class="p">(</span><span class="n">fname</span><span class="p">);</span> <span class="c1">// 将文件名的字符串格式保存在这里
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">new_name</span><span class="p">.</span><span class="n">len</span> <span class="o">=</span> <span class="nf">fname_len</span><span class="p">(</span><span class="n">fname</span><span class="p">);</span>   <span class="c1">// 将文件名的长度保存在这里
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 在这个函数实现新inode和父inode的链接
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">err</span> <span class="o">=</span> <span class="nf">f2fs_add_regular_entry</span><span class="p">(</span><span class="n">dir</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">new_name</span><span class="p">,</span> <span class="n">fname</span><span class="o">-&gt;</span><span class="n">usr_fname</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">						<span class="n">inode</span><span class="p">,</span> <span class="n">ino</span><span class="p">,</span> <span class="n">mode</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nf">f2fs_update_time</span><span class="p">(</span><span class="nf">F2FS_I_SB</span><span class="p">(</span><span class="n">dir</span><span class="p">),</span> <span class="n">REQ_TIME</span><span class="p">);</span> <span class="c1">// 更新修改时间
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">return</span> <span class="n">err</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h4 id="f2fs_add_regular_entry">f2fs_add_regular_entry</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">f2fs_add_regular_entry</span><span class="p">(</span><span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">dir</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="n">qstr</span> <span class="o">*</span><span class="n">new_name</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				<span class="k">const</span> <span class="k">struct</span> <span class="n">qstr</span> <span class="o">*</span><span class="n">orig_name</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				<span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">inode</span><span class="p">,</span> <span class="kt">nid_t</span> <span class="n">ino</span><span class="p">,</span> <span class="kt">umode_t</span> <span class="n">mode</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="p">...</span>
+</span></span><span class="line"><span class="cl">	<span class="c1">// 上面的机制比较复杂
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// 上面做了一大堆事情可以理解为，根据[文件名的长度]创建一个新的f2fs_dir_entry，然后加入到父目录当中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// 需要注意的是这个f2fs_dir_entry还没有包含新inode的信息
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>       
+</span></span><span class="line"><span class="cl">  <span class="c1">//  接下来就是要做的就是
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// 	1. 为新的vfs inode创建inode page，初始化与父目录有关的信息
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// 	2. 基于新inode的信息(名字，ino等)更新f2fs_dir_entry
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">inode</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 这个函数就是创建inode page，初始化与父目录有关的信息
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="n">page</span> <span class="o">=</span> <span class="nf">f2fs_init_inode_metadata</span><span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="n">dir</span><span class="p">,</span> <span class="n">new_name</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">						<span class="n">orig_name</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// 基于新inode的信息(名字，ino等)更新f2fs_dir_entry
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nf">f2fs_update_dentry</span><span class="p">(</span><span class="n">ino</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">d</span><span class="p">,</span> <span class="n">new_name</span><span class="p">,</span> <span class="n">dentry_hash</span><span class="p">,</span> <span class="n">bit_pos</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nf">set_page_dirty</span><span class="p">(</span><span class="n">dentry_page</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">f2fs_update_parent_metadata</span><span class="p">(</span><span class="n">dir</span><span class="p">,</span> <span class="n">inode</span><span class="p">,</span> <span class="n">current_depth</span><span class="p">);</span> <span class="c1">// 清除FI_NEW_INODE的flag
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">return</span> <span class="n">err</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h4 id="f2fs_init_inode_metadata">f2fs_init_inode_metadata</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="nf">f2fs_init_inode_metadata</span><span class="p">(</span><span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">inode</span><span class="p">,</span> <span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">dir</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			<span class="k">const</span> <span class="k">struct</span> <span class="n">qstr</span> <span class="o">*</span><span class="n">new_name</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="n">qstr</span> <span class="o">*</span><span class="n">orig_name</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			<span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">dpage</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">int</span> <span class="n">err</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="c1">// 由于新inode设置了FI_NEW_INODE
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="p">(</span><span class="nf">is_inode_flag_set</span><span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="n">FI_NEW_INODE</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 创建一个新的inode page，然后初始化acl、security等信息。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="n">page</span> <span class="o">=</span> <span class="nf">f2fs_new_inode_page</span><span class="p">(</span><span class="n">inode</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="n">err</span> <span class="o">=</span> <span class="nf">f2fs_init_acl</span><span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="n">dir</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">dpage</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="n">err</span> <span class="o">=</span> <span class="nf">f2fs_init_security</span><span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="n">dir</span><span class="p">,</span> <span class="n">orig_name</span><span class="p">,</span> <span class="n">page</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">  	<span class="k">if</span> <span class="p">((</span><span class="nf">f2fs_encrypted_inode</span><span class="p">(</span><span class="n">dir</span><span class="p">)</span> <span class="o">||</span> <span class="n">dummy_encrypt</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nf">f2fs_may_encrypt</span><span class="p">(</span><span class="n">inode</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="n">err</span> <span class="o">=</span> <span class="nf">fscrypt_inherit_context</span><span class="p">(</span><span class="n">dir</span><span class="p">,</span> <span class="n">inode</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="nb">false</span><span class="p">);</span> <span class="c1">// 从父目录继承加密的上下文
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="n">page</span> <span class="o">=</span> <span class="nf">f2fs_get_node_page</span><span class="p">(</span><span class="nf">F2FS_I_SB</span><span class="p">(</span><span class="n">dir</span><span class="p">),</span> <span class="n">inode</span><span class="o">-&gt;</span><span class="n">i_ino</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">new_name</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 然后初始化新创建的inode page的名字
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="nf">init_dent_inode</span><span class="p">(</span><span class="n">new_name</span><span class="p">,</span> <span class="n">page</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="p">(</span><span class="nf">f2fs_encrypted_inode</span><span class="p">(</span><span class="n">dir</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">			<span class="nf">file_set_enc_name</span><span class="p">(</span><span class="n">inode</span><span class="p">);</span> <span class="c1">// 为inode设置FADVISE_ENC_NAME_BIT字段
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="c1">// 再增加inode的引入链接。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="p">(</span><span class="nf">is_inode_flag_set</span><span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="n">FI_INC_LINK</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">		<span class="nf">f2fs_i_links_write</span><span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="nb">true</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="n">page</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h4 id="fscrypt_inherit_context">fscrypt_inherit_context</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">fscrypt_inherit_context</span><span class="p">(</span><span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">parent</span><span class="p">,</span> <span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">child</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">						<span class="kt">void</span> <span class="o">*</span><span class="n">fs_data</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">preload</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">fscrypt_context</span> <span class="n">ctx</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">fscrypt_info</span> <span class="o">*</span><span class="n">ci</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">int</span> <span class="n">res</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="n">res</span> <span class="o">=</span> <span class="nf">fscrypt_get_encryption_info</span><span class="p">(</span><span class="n">parent</span><span class="p">);</span>  <span class="c1">// 获取父目录的加密信息
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="n">ci</span> <span class="o">=</span> <span class="n">parent</span><span class="o">-&gt;</span><span class="n">i_crypt_info</span><span class="p">;</span> <span class="c1">// 获取父目录inode的i_crypt_info
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// 根据父目录的加密信息设置上下文的属性
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">ctx</span><span class="p">.</span><span class="n">format</span> <span class="o">=</span> <span class="n">FS_ENCRYPTION_CONTEXT_FORMAT_V1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">ctx</span><span class="p">.</span><span class="n">contents_encryption_mode</span> <span class="o">=</span> <span class="n">ci</span><span class="o">-&gt;</span><span class="n">ci_data_mode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">ctx</span><span class="p">.</span><span class="n">filenames_encryption_mode</span> <span class="o">=</span> <span class="n">ci</span><span class="o">-&gt;</span><span class="n">ci_filename_mode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">ctx</span><span class="p">.</span><span class="n">flags</span> <span class="o">=</span> <span class="n">ci</span><span class="o">-&gt;</span><span class="n">ci_flags</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">memcpy</span><span class="p">(</span><span class="n">ctx</span><span class="p">.</span><span class="n">master_key_descriptor</span><span class="p">,</span> <span class="n">ci</span><span class="o">-&gt;</span><span class="n">ci_master_key</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">	       <span class="n">FS_KEY_DESCRIPTOR_SIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 生成随机数nonce
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nf">get_random_bytes</span><span class="p">(</span><span class="n">ctx</span><span class="p">.</span><span class="n">nonce</span><span class="p">,</span> <span class="n">FS_KEY_DERIVATION_NONCE_SIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">BUILD_BUG_ON</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span> <span class="o">!=</span> <span class="n">FSCRYPT_SET_CONTEXT_MAX_SIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 为当前文件设置加密的上下文存储到xattr中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">res</span> <span class="o">=</span> <span class="n">parent</span><span class="o">-&gt;</span><span class="n">i_sb</span><span class="o">-&gt;</span><span class="n">s_cop</span><span class="o">-&gt;</span><span class="nf">set_context</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ctx</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">						<span class="k">sizeof</span><span class="p">(</span><span class="n">ctx</span><span class="p">),</span> <span class="n">fs_data</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">res</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="n">res</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="n">preload</span> <span class="o">?</span> <span class="nf">fscrypt_get_encryption_info</span><span class="p">(</span><span class="n">child</span><span class="p">)</span><span class="o">:</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// 是否设置新文件的加密信息
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></div><h3 id="open">open</h3>
+<h4 id="f2fs_file_open">f2fs_file_open</h4>
+<p>在<code>f2fs_file_open</code>中首先调用了<code>fscrypt_file_open</code>，检查文件是否加密等其他操作，做完加密的部分后才是处理打开文件的流程</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="nf">f2fs_file_open</span><span class="p">(</span><span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">inode</span><span class="p">,</span> <span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="n">filp</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">int</span> <span class="n">err</span> <span class="o">=</span> <span class="nf">fscrypt_file_open</span><span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="n">filp</span><span class="p">);</span> <span class="c1">// open前进行加密的相关准备
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="n">filp</span><span class="o">-&gt;</span><span class="n">f_mode</span> <span class="o">|=</span> <span class="n">FMODE_NOWAIT</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="nf">dquot_file_open</span><span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="n">filp</span><span class="p">);</span> <span class="c1">// open文件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></div><h4 id="fscrypt_file_open">fscrypt_file_open</h4>
+<p><code>fscrypt_file_open</code>首先请求文件的密钥，如果出现错误则返回；然后获取文件的父目录，比较父目录与文件的加密策略是否相同，不同则报错。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">fscrypt_file_open</span><span class="p">(</span><span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">inode</span><span class="p">,</span> <span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="n">filp</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">int</span> <span class="n">err</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">dentry</span> <span class="o">*</span><span class="n">dir</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="n">err</span> <span class="o">=</span> <span class="nf">fscrypt_require_key</span><span class="p">(</span><span class="n">inode</span><span class="p">);</span> <span class="c1">// 请求文件密钥
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="n">dir</span> <span class="o">=</span> <span class="nf">dget_parent</span><span class="p">(</span><span class="nf">file_dentry</span><span class="p">(</span><span class="n">filp</span><span class="p">));</span> <span class="c1">// 获取父目录
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="p">(</span><span class="nf">IS_ENCRYPTED</span><span class="p">(</span><span class="nf">d_inode</span><span class="p">(</span><span class="n">dir</span><span class="p">))</span> <span class="o">&amp;&amp;</span>
+</span></span><span class="line"><span class="cl">	    <span class="o">!</span><span class="nf">fscrypt_has_permitted_context</span><span class="p">(</span><span class="nf">d_inode</span><span class="p">(</span><span class="n">dir</span><span class="p">),</span> <span class="n">inode</span><span class="p">))</span> <span class="p">{</span> <span class="c1">// 与父目录的加密策略是否一致
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="nf">fscrypt_warn</span><span class="p">(</span><span class="n">inode</span><span class="o">-&gt;</span><span class="n">i_sb</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			     <span class="s">&#34;inconsistent encryption contexts: %lu/%lu&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			     <span class="nf">d_inode</span><span class="p">(</span><span class="n">dir</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">i_ino</span><span class="p">,</span> <span class="n">inode</span><span class="o">-&gt;</span><span class="n">i_ino</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="n">err</span> <span class="o">=</span> <span class="o">-</span><span class="n">EPERM</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">dput</span><span class="p">(</span><span class="n">dir</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="n">err</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h4 id="fscrypt_require_key">fscrypt_require_key</h4>
+<p><code>fscrypt_require_key</code>首先判断是否为加密文件，非加密文件直接返回0。对于加密文件，通过<code>fscrypt_get_encryption_info</code>获取加密信息，获取完之后还要再检查密钥是否还存在，防止密钥被回收</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kr">inline</span> <span class="kt">int</span> <span class="nf">fscrypt_require_key</span><span class="p">(</span><span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">inode</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="nf">IS_ENCRYPTED</span><span class="p">(</span><span class="n">inode</span><span class="p">))</span> <span class="p">{</span> <span class="c1">// 文件是否加密
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="kt">int</span> <span class="n">err</span> <span class="o">=</span> <span class="nf">fscrypt_get_encryption_info</span><span class="p">(</span><span class="n">inode</span><span class="p">);</span> <span class="c1">// 获取加密信息
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nf">fscrypt_has_encryption_key</span><span class="p">(</span><span class="n">inode</span><span class="p">))</span> <span class="c1">// 判断密钥是否revoke
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="k">return</span> <span class="o">-</span><span class="n">ENOKEY</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h4 id="fscrypt_get_encryption_info">fscrypt_get_encryption_info</h4>
+<p><code>fscrypt_get_encryption_info</code>首先判断文件的加密信息是否存在，存在的话直接返回。然后使用superblock的flags进行初始化，</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">fscrypt_get_encryption_info</span><span class="p">(</span><span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">inode</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">fscrypt_info</span> <span class="o">*</span><span class="n">crypt_info</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">fscrypt_context</span> <span class="n">ctx</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">crypto_skcipher</span> <span class="o">*</span><span class="n">ctfm</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">fscrypt_mode</span> <span class="o">*</span><span class="n">mode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">u8</span> <span class="o">*</span><span class="n">raw_key</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">int</span> <span class="n">res</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">inode</span><span class="o">-&gt;</span><span class="n">i_crypt_info</span><span class="p">)</span> <span class="c1">// 判断加密信息是否存在
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="n">res</span> <span class="o">=</span> <span class="nf">fscrypt_initialize</span><span class="p">(</span><span class="n">inode</span><span class="o">-&gt;</span><span class="n">i_sb</span><span class="o">-&gt;</span><span class="n">s_cop</span><span class="o">-&gt;</span><span class="n">flags</span><span class="p">);</span> <span class="c1">// 初始化
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="p">(</span><span class="n">res</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="n">res</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="n">res</span> <span class="o">=</span> <span class="n">inode</span><span class="o">-&gt;</span><span class="n">i_sb</span><span class="o">-&gt;</span><span class="n">s_cop</span><span class="o">-&gt;</span><span class="nf">get_context</span><span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ctx</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ctx</span><span class="p">));</span> <span class="c1">// 从xattr中获取context，context中存储了policy
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="p">(</span><span class="n">res</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nf">fscrypt_dummy_context_enabled</span><span class="p">(</span><span class="n">inode</span><span class="p">)</span> <span class="o">||</span>
+</span></span><span class="line"><span class="cl">		    <span class="nf">IS_ENCRYPTED</span><span class="p">(</span><span class="n">inode</span><span class="p">))</span> <span class="c1">// 获取context失败
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="k">return</span> <span class="n">res</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="c1">// 如果这个目录没有加密，创建一个假的context
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="nf">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ctx</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ctx</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">		<span class="n">ctx</span><span class="p">.</span><span class="n">format</span> <span class="o">=</span> <span class="n">FS_ENCRYPTION_CONTEXT_FORMAT_V1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="n">ctx</span><span class="p">.</span><span class="n">contents_encryption_mode</span> <span class="o">=</span> <span class="n">FS_ENCRYPTION_MODE_AES_256_XTS</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="n">ctx</span><span class="p">.</span><span class="n">filenames_encryption_mode</span> <span class="o">=</span> <span class="n">FS_ENCRYPTION_MODE_AES_256_CTS</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="nf">memset</span><span class="p">(</span><span class="n">ctx</span><span class="p">.</span><span class="n">master_key_descriptor</span><span class="p">,</span> <span class="mh">0x42</span><span class="p">,</span> <span class="n">FS_KEY_DESCRIPTOR_SIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">res</span> <span class="o">!=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ctx</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="o">-</span><span class="n">EINVAL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="n">crypt_info</span> <span class="o">=</span> <span class="nf">kmem_cache_alloc</span><span class="p">(</span><span class="n">fscrypt_info_cachep</span><span class="p">,</span> <span class="n">GFP_NOFS</span><span class="p">);</span>  <span class="c1">// 为加密信息的结构体分配空间
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="c1">// 设置加密信息
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">crypt_info</span><span class="o">-&gt;</span><span class="n">ci_flags</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">.</span><span class="n">flags</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">crypt_info</span><span class="o">-&gt;</span><span class="n">ci_data_mode</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">.</span><span class="n">contents_encryption_mode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">crypt_info</span><span class="o">-&gt;</span><span class="n">ci_filename_mode</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">.</span><span class="n">filenames_encryption_mode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">crypt_info</span><span class="o">-&gt;</span><span class="n">ci_ctfm</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">crypt_info</span><span class="o">-&gt;</span><span class="n">ci_essiv_tfm</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">memcpy</span><span class="p">(</span><span class="n">crypt_info</span><span class="o">-&gt;</span><span class="n">ci_master_key</span><span class="p">,</span> <span class="n">ctx</span><span class="p">.</span><span class="n">master_key_descriptor</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				<span class="k">sizeof</span><span class="p">(</span><span class="n">crypt_info</span><span class="o">-&gt;</span><span class="n">ci_master_key</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 加密算法的相关信息
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">mode</span> <span class="o">=</span> <span class="nf">select_encryption_mode</span><span class="p">(</span><span class="n">crypt_info</span><span class="p">,</span> <span class="n">inode</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 为密钥分配空间
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">raw_key</span> <span class="o">=</span> <span class="nf">kmalloc</span><span class="p">(</span><span class="n">mode</span><span class="o">-&gt;</span><span class="n">keysize</span><span class="p">,</span> <span class="n">GFP_NOFS</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">raw_key</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="k">goto</span> <span class="n">out</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 生成最终的密钥
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">res</span> <span class="o">=</span> <span class="nf">find_and_derive_key</span><span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ctx</span><span class="p">,</span> <span class="n">raw_key</span><span class="p">,</span> <span class="n">mode</span><span class="o">-&gt;</span><span class="n">keysize</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">res</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="k">goto</span> <span class="n">out</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="n">ctfm</span> <span class="o">=</span> <span class="nf">crypto_alloc_skcipher</span><span class="p">(</span><span class="n">mode</span><span class="o">-&gt;</span><span class="n">cipher_str</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span> <span class="c1">// 设置加密算法为mode-&gt;cipher_str，一般content为AES-256-XTS
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="n">crypt_info</span><span class="o">-&gt;</span><span class="n">ci_ctfm</span> <span class="o">=</span> <span class="n">ctfm</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">crypto_skcipher_set_flags</span><span class="p">(</span><span class="n">ctfm</span><span class="p">,</span> <span class="n">CRYPTO_TFM_REQ_WEAK_KEY</span><span class="p">);</span> <span class="c1">// 允许使用弱密码
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">res</span> <span class="o">=</span> <span class="nf">crypto_skcipher_setkey</span><span class="p">(</span><span class="n">ctfm</span><span class="p">,</span> <span class="n">raw_key</span><span class="p">,</span> <span class="n">mode</span><span class="o">-&gt;</span><span class="n">keysize</span><span class="p">);</span> <span class="c1">// 设置加密密钥
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// 如果文件是普通文件（S_ISREG）并且数据加密模式是AES-128-CBC，则初始化ESSIV生成器
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="p">(</span><span class="nf">S_ISREG</span><span class="p">(</span><span class="n">inode</span><span class="o">-&gt;</span><span class="n">i_mode</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+</span></span><span class="line"><span class="cl">	    <span class="n">crypt_info</span><span class="o">-&gt;</span><span class="n">ci_data_mode</span> <span class="o">==</span> <span class="n">FS_ENCRYPTION_MODE_AES_128_CBC</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="n">res</span> <span class="o">=</span> <span class="nf">init_essiv_generator</span><span class="p">(</span><span class="n">crypt_info</span><span class="p">,</span> <span class="n">raw_key</span><span class="p">,</span> <span class="n">mode</span><span class="o">-&gt;</span><span class="n">keysize</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 将crypt_info添加到inode的i_crypt_info中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="p">(</span><span class="nf">cmpxchg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">inode</span><span class="o">-&gt;</span><span class="n">i_crypt_info</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">crypt_info</span><span class="p">)</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="n">crypt_info</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nl">out</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">res</span> <span class="o">==</span> <span class="o">-</span><span class="n">ENOKEY</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="n">res</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">put_crypt_info</span><span class="p">(</span><span class="n">crypt_info</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">kzfree</span><span class="p">(</span><span class="n">raw_key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="n">res</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h4 id="find_and_derive_key">find_and_derive_key</h4>
+<p><code>find_and_derive_key</code>首先获取主密钥，然后使用主密钥和nonce派生出最终用于加密的密钥</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="nf">find_and_derive_key</span><span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">inode</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			       <span class="k">const</span> <span class="k">struct</span> <span class="n">fscrypt_context</span> <span class="o">*</span><span class="n">ctx</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			       <span class="n">u8</span> <span class="o">*</span><span class="n">derived_key</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">derived_keysize</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">key</span> <span class="o">*</span><span class="n">key</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">const</span> <span class="k">struct</span> <span class="n">fscrypt_key</span> <span class="o">*</span><span class="n">payload</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">int</span> <span class="n">err</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="n">key</span> <span class="o">=</span> <span class="nf">find_and_lock_process_key</span><span class="p">(</span><span class="n">FS_KEY_DESC_PREFIX</span><span class="p">,</span>  <span class="c1">// 获取密钥
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>					<span class="n">ctx</span><span class="o">-&gt;</span><span class="n">master_key_descriptor</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">					<span class="n">derived_keysize</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">payload</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">key</span> <span class="o">==</span> <span class="nf">ERR_PTR</span><span class="p">(</span><span class="o">-</span><span class="n">ENOKEY</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">inode</span><span class="o">-&gt;</span><span class="n">i_sb</span><span class="o">-&gt;</span><span class="n">s_cop</span><span class="o">-&gt;</span><span class="n">key_prefix</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">//如果&#39;fscrypt:&#39;这个prefix对应的密钥没有找到，尝试&#39;f2fs:&#39;这个prefix
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="n">key</span> <span class="o">=</span> <span class="nf">find_and_lock_process_key</span><span class="p">(</span><span class="n">inode</span><span class="o">-&gt;</span><span class="n">i_sb</span><span class="o">-&gt;</span><span class="n">s_cop</span><span class="o">-&gt;</span><span class="n">key_prefix</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">						<span class="n">ctx</span><span class="o">-&gt;</span><span class="n">master_key_descriptor</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">						<span class="n">derived_keysize</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">payload</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="nf">IS_ERR</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="nf">PTR_ERR</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="n">err</span> <span class="o">=</span> <span class="nf">derive_key_aes</span><span class="p">(</span><span class="n">payload</span><span class="o">-&gt;</span><span class="n">raw</span><span class="p">,</span> <span class="n">ctx</span><span class="p">,</span> <span class="n">derived_key</span><span class="p">,</span> <span class="n">derived_keysize</span><span class="p">);</span> <span class="c1">// 派生密钥
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nf">up_read</span><span class="p">(</span><span class="o">&amp;</span><span class="n">key</span><span class="o">-&gt;</span><span class="n">sem</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">key_put</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="n">err</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h4 id="find_and_lock_process_key">find_and_lock_process_key</h4>
+<p><code>find_and_lock_process_key</code>首先将prefix和descriptor组合成description，用于查找密钥，然后调用<code>request_key</code>从当前任务的订阅密钥链表中查找密钥，成功找到了密钥后，获取密钥的读锁，以确保在操作密钥时不会被其他任务修改。然后调用 <code>user_key_payload_locked</code> 函数提取密钥的payload，如果成功提取了用户密钥载荷，将密钥载荷的指针转换为 <code>struct fscrypt_key</code> 类型的指针，并对载荷进行合法性检查，检查通过则设置payload_ret并返回key。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="k">struct</span> <span class="n">key</span> <span class="o">*</span>
+</span></span><span class="line"><span class="cl"><span class="nf">find_and_lock_process_key</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">prefix</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			  <span class="k">const</span> <span class="n">u8</span> <span class="n">descriptor</span><span class="p">[</span><span class="n">FS_KEY_DESCRIPTOR_SIZE</span><span class="p">],</span>
+</span></span><span class="line"><span class="cl">			  <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">min_keysize</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			  <span class="k">const</span> <span class="k">struct</span> <span class="n">fscrypt_key</span> <span class="o">**</span><span class="n">payload_ret</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">char</span> <span class="o">*</span><span class="n">description</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">key</span> <span class="o">*</span><span class="n">key</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">const</span> <span class="k">struct</span> <span class="n">user_key_payload</span> <span class="o">*</span><span class="n">ukp</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">const</span> <span class="k">struct</span> <span class="n">fscrypt_key</span> <span class="o">*</span><span class="n">payload</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="n">description</span> <span class="o">=</span> <span class="nf">kasprintf</span><span class="p">(</span><span class="n">GFP_NOFS</span><span class="p">,</span> <span class="s">&#34;%s%*phN&#34;</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				<span class="n">FS_KEY_DESCRIPTOR_SIZE</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">);</span>  <span class="c1">// 组合prefix和descriptor
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">description</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="nf">ERR_PTR</span><span class="p">(</span><span class="o">-</span><span class="n">ENOMEM</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="n">key</span> <span class="o">=</span> <span class="nf">request_key</span><span class="p">(</span><span class="o">&amp;</span><span class="n">key_type_logon</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span> <span class="c1">// 根据keytype和description查找密钥
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nf">kfree</span><span class="p">(</span><span class="n">description</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="nf">IS_ERR</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="n">key</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nf">down_read</span><span class="p">(</span><span class="o">&amp;</span><span class="n">key</span><span class="o">-&gt;</span><span class="n">sem</span><span class="p">);</span> <span class="c1">// 获取密钥的读锁
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">ukp</span> <span class="o">=</span> <span class="nf">user_key_payload_locked</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>  <span class="c1">// 获取key的数据载荷
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">ukp</span><span class="p">)</span> <span class="cm">/* was the key revoked before we acquired its semaphore? */</span>
+</span></span><span class="line"><span class="cl">		<span class="k">goto</span> <span class="n">invalid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="n">payload</span> <span class="o">=</span> <span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">fscrypt_key</span> <span class="o">*</span><span class="p">)</span><span class="n">ukp</span><span class="o">-&gt;</span><span class="n">data</span><span class="p">;</span>  <span class="c1">// 将数据载荷的data转换为fscrypt_key
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// 检查data的合法性
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="p">(</span><span class="n">ukp</span><span class="o">-&gt;</span><span class="n">datalen</span> <span class="o">!=</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">fscrypt_key</span><span class="p">)</span> <span class="o">||</span>
+</span></span><span class="line"><span class="cl">	    <span class="n">payload</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="o">||</span> <span class="n">payload</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">&gt;</span> <span class="n">FS_MAX_KEY_SIZE</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nf">fscrypt_warn</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			     <span class="s">&#34;key with description &#39;%s&#39; has invalid payload&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			     <span class="n">key</span><span class="o">-&gt;</span><span class="n">description</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="k">goto</span> <span class="n">invalid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">payload</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">&lt;</span> <span class="n">min_keysize</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nf">fscrypt_warn</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			     <span class="s">&#34;key with description &#39;%s&#39; is too short (got %u bytes, need %u+ bytes)&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			     <span class="n">key</span><span class="o">-&gt;</span><span class="n">description</span><span class="p">,</span> <span class="n">payload</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">,</span> <span class="n">min_keysize</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="k">goto</span> <span class="n">invalid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="c1">// 设置返回的payload
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="o">*</span><span class="n">payload_ret</span> <span class="o">=</span> <span class="n">payload</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 返回key
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">return</span> <span class="n">key</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nl">invalid</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">up_read</span><span class="p">(</span><span class="o">&amp;</span><span class="n">key</span><span class="o">-&gt;</span><span class="n">sem</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">key_put</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="nf">ERR_PTR</span><span class="p">(</span><span class="o">-</span><span class="n">ENOKEY</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h4 id="derive_key_aes">derive_key_aes</h4>
+<p><code>derive_key_aes</code>通过AES-128-ECB加密算法生成派生密钥，使用ctx中的随机数nonce作为AES密钥加密主密钥得到派生密钥</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="nf">derive_key_aes</span><span class="p">(</span><span class="k">const</span> <span class="n">u8</span> <span class="o">*</span><span class="n">master_key</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			  <span class="k">const</span> <span class="k">struct</span> <span class="n">fscrypt_context</span> <span class="o">*</span><span class="n">ctx</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			  <span class="n">u8</span> <span class="o">*</span><span class="n">derived_key</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">derived_keysize</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">int</span> <span class="n">res</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">skcipher_request</span> <span class="o">*</span><span class="n">req</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">DECLARE_CRYPTO_WAIT</span><span class="p">(</span><span class="n">wait</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">scatterlist</span> <span class="n">src_sg</span><span class="p">,</span> <span class="n">dst_sg</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">crypto_skcipher</span> <span class="o">*</span><span class="n">tfm</span> <span class="o">=</span> <span class="nf">crypto_alloc_skcipher</span><span class="p">(</span><span class="s">&#34;ecb(aes)&#34;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>  <span class="c1">// 设置加密算法为ECB
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="nf">IS_ERR</span><span class="p">(</span><span class="n">tfm</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="n">res</span> <span class="o">=</span> <span class="nf">PTR_ERR</span><span class="p">(</span><span class="n">tfm</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="n">tfm</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="k">goto</span> <span class="n">out</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">crypto_skcipher_set_flags</span><span class="p">(</span><span class="n">tfm</span><span class="p">,</span> <span class="n">CRYPTO_TFM_REQ_WEAK_KEY</span><span class="p">);</span> <span class="c1">// 可使用弱密码
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">req</span> <span class="o">=</span> <span class="nf">skcipher_request_alloc</span><span class="p">(</span><span class="n">tfm</span><span class="p">,</span> <span class="n">GFP_NOFS</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">req</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="n">res</span> <span class="o">=</span> <span class="o">-</span><span class="n">ENOMEM</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="k">goto</span> <span class="n">out</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">skcipher_request_set_callback</span><span class="p">(</span><span class="n">req</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			<span class="n">CRYPTO_TFM_REQ_MAY_BACKLOG</span> <span class="o">|</span> <span class="n">CRYPTO_TFM_REQ_MAY_SLEEP</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			<span class="n">crypto_req_done</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">wait</span><span class="p">);</span>  <span class="c1">// 设置回调接口
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">res</span> <span class="o">=</span> <span class="nf">crypto_skcipher_setkey</span><span class="p">(</span><span class="n">tfm</span><span class="p">,</span> <span class="n">ctx</span><span class="o">-&gt;</span><span class="n">nonce</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ctx</span><span class="o">-&gt;</span><span class="n">nonce</span><span class="p">));</span> <span class="c1">// 将nonce设置为密钥
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="p">(</span><span class="n">res</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="k">goto</span> <span class="n">out</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nf">sg_init_one</span><span class="p">(</span><span class="o">&amp;</span><span class="n">src_sg</span><span class="p">,</span> <span class="n">master_key</span><span class="p">,</span> <span class="n">derived_keysize</span><span class="p">);</span> <span class="c1">// 加密的源数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nf">sg_init_one</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dst_sg</span><span class="p">,</span> <span class="n">derived_key</span><span class="p">,</span> <span class="n">derived_keysize</span><span class="p">);</span> <span class="c1">// 加密的目标（存储加的结果）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> 	<span class="nf">skcipher_request_set_crypt</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">src_sg</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">dst_sg</span><span class="p">,</span> <span class="n">derived_keysize</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				   <span class="nb">NULL</span><span class="p">);</span> <span class="c1">// 设置加密请求的源、目的地、密钥长度
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">res</span> <span class="o">=</span> <span class="nf">crypto_wait_req</span><span class="p">(</span><span class="nf">crypto_skcipher_encrypt</span><span class="p">(</span><span class="n">req</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">wait</span><span class="p">);</span> <span class="c1">// 等待加密完成
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nl">out</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">skcipher_request_free</span><span class="p">(</span><span class="n">req</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">crypto_free_skcipher</span><span class="p">(</span><span class="n">tfm</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="n">res</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h3 id="write">write</h3>
+<h4 id="f2fs_do_write_data_page">f2fs_do_write_data_page</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">f2fs_do_write_data_page</span><span class="p">(</span><span class="k">struct</span> <span class="n">f2fs_io_info</span> <span class="o">*</span><span class="n">fio</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">ipu_force</span> <span class="o">||</span> <span class="p">(</span><span class="nf">is_valid_data_blkaddr</span><span class="p">(</span><span class="n">fio</span><span class="o">-&gt;</span><span class="n">sbi</span><span class="p">,</span> <span class="n">fio</span><span class="o">-&gt;</span><span class="n">old_blkaddr</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+</span></span><span class="line"><span class="cl">					<span class="nf">need_inplace_update</span><span class="p">(</span><span class="n">fio</span><span class="p">)))</span> <span class="p">{</span>  <span class="c1">// 是否就地更新数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="n">err</span> <span class="o">=</span> <span class="nf">encrypt_one_page</span><span class="p">(</span><span class="n">fio</span><span class="p">);</span> <span class="c1">// 加密数据页
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">		<span class="nf">set_page_writeback</span><span class="p">(</span><span class="n">page</span><span class="p">);</span> <span class="c1">// 将数据页设置为writeback状态
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">		<span class="n">err</span> <span class="o">=</span> <span class="nf">f2fs_inplace_write_data</span><span class="p">(</span><span class="n">fio</span><span class="p">);</span> <span class="c1">// 就地更新数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="nf">trace_f2fs_do_write_data_page</span><span class="p">(</span><span class="n">fio</span><span class="o">-&gt;</span><span class="n">page</span><span class="p">,</span> <span class="n">IPU</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="nf">set_inode_flag</span><span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="n">FI_UPDATE_WRITE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="n">err</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="n">err</span> <span class="o">=</span> <span class="nf">f2fs_get_node_info</span><span class="p">(</span><span class="n">fio</span><span class="o">-&gt;</span><span class="n">sbi</span><span class="p">,</span> <span class="n">dn</span><span class="p">.</span><span class="n">nid</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ni</span><span class="p">);</span> <span class="c1">// 获取dnode信息
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="n">fio</span><span class="o">-&gt;</span><span class="n">version</span> <span class="o">=</span> <span class="n">ni</span><span class="p">.</span><span class="n">version</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="n">err</span> <span class="o">=</span> <span class="nf">encrypt_one_page</span><span class="p">(</span><span class="n">fio</span><span class="p">);</span> <span class="c1">// 加密数据页
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="nf">set_page_writeback</span><span class="p">(</span><span class="n">page</span><span class="p">);</span> <span class="c1">// 将数据页设置为writeback状态
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nf">ClearPageError</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nf">f2fs_outplace_write_data</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dn</span><span class="p">,</span> <span class="n">fio</span><span class="p">);</span> <span class="c1">// 异地更新数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nf">trace_f2fs_do_write_data_page</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">OPU</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">set_inode_flag</span><span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="n">FI_APPEND_WRITE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h4 id="encrypt_one_page">encrypt_one_page</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="nf">encrypt_one_page</span><span class="p">(</span><span class="k">struct</span> <span class="n">f2fs_io_info</span> <span class="o">*</span><span class="n">fio</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">inode</span> <span class="o">=</span> <span class="n">fio</span><span class="o">-&gt;</span><span class="n">page</span><span class="o">-&gt;</span><span class="n">mapping</span><span class="o">-&gt;</span><span class="n">host</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">mpage</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">gfp_t</span> <span class="n">gfp_flags</span> <span class="o">=</span> <span class="n">GFP_NOFS</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nf">f2fs_encrypted_file</span><span class="p">(</span><span class="n">inode</span><span class="p">))</span> <span class="c1">// 检查文件是否加密
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nf">f2fs_wait_on_block_writeback</span><span class="p">(</span><span class="n">fio</span><span class="o">-&gt;</span><span class="n">sbi</span><span class="p">,</span> <span class="n">fio</span><span class="o">-&gt;</span><span class="n">old_blkaddr</span><span class="p">);</span> <span class="c1">// 等待与旧数据块地址相关的块写回
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="nl">retry_encrypt</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">	<span class="n">fio</span><span class="o">-&gt;</span><span class="n">encrypted_page</span> <span class="o">=</span> <span class="nf">fscrypt_encrypt_page</span><span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="n">fio</span><span class="o">-&gt;</span><span class="n">page</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			<span class="n">PAGE_SIZE</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">fio</span><span class="o">-&gt;</span><span class="n">page</span><span class="o">-&gt;</span><span class="n">index</span><span class="p">,</span> <span class="n">gfp_flags</span><span class="p">);</span>  <span class="c1">// 加密数据页，并将加密后的页保存在fio-&gt;encrypted_page中
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="p">(</span><span class="nf">IS_ERR</span><span class="p">(</span><span class="n">fio</span><span class="o">-&gt;</span><span class="n">encrypted_page</span><span class="p">))</span> <span class="p">{</span> <span class="c1">// 加密失败
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="cm">/* flush pending IOs and wait for a while in the ENOMEM case */</span>
+</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="p">(</span><span class="nf">PTR_ERR</span><span class="p">(</span><span class="n">fio</span><span class="o">-&gt;</span><span class="n">encrypted_page</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="n">ENOMEM</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 内存不足导致失败
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="nf">f2fs_flush_merged_writes</span><span class="p">(</span><span class="n">fio</span><span class="o">-&gt;</span><span class="n">sbi</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">			<span class="nf">congestion_wait</span><span class="p">(</span><span class="n">BLK_RW_ASYNC</span><span class="p">,</span> <span class="n">HZ</span><span class="o">/</span><span class="mi">50</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">			<span class="n">gfp_flags</span> <span class="o">|=</span> <span class="n">__GFP_NOFAIL</span><span class="p">;</span> <span class="c1">// 设置内存分配标志为不失败
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="k">goto</span> <span class="n">retry_encrypt</span><span class="p">;</span>  <span class="c1">// 重试加密
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="nf">PTR_ERR</span><span class="p">(</span><span class="n">fio</span><span class="o">-&gt;</span><span class="n">encrypted_page</span><span class="p">);</span> <span class="c1">// 其他错误返回
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="n">mpage</span> <span class="o">=</span> <span class="nf">find_lock_page</span><span class="p">(</span><span class="nf">META_MAPPING</span><span class="p">(</span><span class="n">fio</span><span class="o">-&gt;</span><span class="n">sbi</span><span class="p">),</span> <span class="n">fio</span><span class="o">-&gt;</span><span class="n">old_blkaddr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">mpage</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="p">(</span><span class="nf">PageUptodate</span><span class="p">(</span><span class="n">mpage</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">			<span class="nf">memcpy</span><span class="p">(</span><span class="nf">page_address</span><span class="p">(</span><span class="n">mpage</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl">				<span class="nf">page_address</span><span class="p">(</span><span class="n">fio</span><span class="o">-&gt;</span><span class="n">encrypted_page</span><span class="p">),</span> <span class="n">PAGE_SIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="nf">f2fs_put_page</span><span class="p">(</span><span class="n">mpage</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h4 id="fscrypt_encrypt_page">fscrypt_encrypt_page</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="nf">fscrypt_encrypt_page</span><span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">inode</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				<span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				<span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">len</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				<span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">offs</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				<span class="n">u64</span> <span class="n">lblk_num</span><span class="p">,</span> <span class="kt">gfp_t</span> <span class="n">gfp_flags</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">fscrypt_ctx</span> <span class="o">*</span><span class="n">ctx</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">ciphertext_page</span> <span class="o">=</span> <span class="n">page</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">int</span> <span class="n">err</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nf">BUG_ON</span><span class="p">(</span><span class="n">len</span> <span class="o">%</span> <span class="n">FS_CRYPTO_BLOCK_SIZE</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">);</span> <span class="c1">// 数据长度必须为FS_CRYPTO_BLOCK_SIZE（16）的倍数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">inode</span><span class="o">-&gt;</span><span class="n">i_sb</span><span class="o">-&gt;</span><span class="n">s_cop</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">FS_CFLG_OWN_PAGES</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 是否支持原地加密
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="cm">/* with inplace-encryption we just encrypt the page */</span>
+</span></span><span class="line"><span class="cl">		<span class="n">err</span> <span class="o">=</span> <span class="nf">fscrypt_do_page_crypto</span><span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="n">FS_ENCRYPT</span><span class="p">,</span> <span class="n">lblk_num</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">					     <span class="n">ciphertext_page</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">offs</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">					     <span class="n">gfp_flags</span><span class="p">);</span> <span class="c1">// 加密数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="n">ciphertext_page</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">	<span class="n">ctx</span> <span class="o">=</span> <span class="nf">fscrypt_get_ctx</span><span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="n">gfp_flags</span><span class="p">);</span> <span class="c1">// 获取context
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="cm">/* The encryption operation will require a bounce page. */</span>
+</span></span><span class="line"><span class="cl">	<span class="n">ciphertext_page</span> <span class="o">=</span> <span class="nf">fscrypt_alloc_bounce_page</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">gfp_flags</span><span class="p">);</span> <span class="c1">// 申请一个页用于存储加密后的数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="n">ctx</span><span class="o">-&gt;</span><span class="n">w</span><span class="p">.</span><span class="n">control_page</span> <span class="o">=</span> <span class="n">page</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="n">err</span> <span class="o">=</span> <span class="nf">fscrypt_do_page_crypto</span><span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="n">FS_ENCRYPT</span><span class="p">,</span> <span class="n">lblk_num</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				     <span class="n">page</span><span class="p">,</span> <span class="n">ciphertext_page</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">offs</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				     <span class="n">gfp_flags</span><span class="p">);</span> <span class="c1">// 加密数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="nf">SetPagePrivate</span><span class="p">(</span><span class="n">ciphertext_page</span><span class="p">);</span> <span class="c1">// 标记为私有页
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nf">set_page_private</span><span class="p">(</span><span class="n">ciphertext_page</span><span class="p">,</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="p">)</span><span class="n">ctx</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">lock_page</span><span class="p">(</span><span class="n">ciphertext_page</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="n">ciphertext_page</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nl">errout</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">fscrypt_release_ctx</span><span class="p">(</span><span class="n">ctx</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="n">ciphertext_page</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h4 id="fscrypt_do_page_crypto">fscrypt_do_page_crypto</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">fscrypt_do_page_crypto</span><span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">inode</span><span class="p">,</span> <span class="kt">fscrypt_direction_t</span> <span class="n">rw</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			   <span class="n">u64</span> <span class="n">lblk_num</span><span class="p">,</span> <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">src_page</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			   <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">dest_page</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">len</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			   <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">offs</span><span class="p">,</span> <span class="kt">gfp_t</span> <span class="n">gfp_flags</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="p">...</span>
+</span></span><span class="line"><span class="cl">    
+</span></span><span class="line"><span class="cl">	<span class="n">iv</span><span class="p">.</span><span class="n">index</span> <span class="o">=</span> <span class="nf">cpu_to_le64</span><span class="p">(</span><span class="n">lblk_num</span><span class="p">);</span> <span class="c1">// 初始化向量设置为逻辑块号
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nf">memset</span><span class="p">(</span><span class="n">iv</span><span class="p">.</span><span class="n">padding</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">iv</span><span class="p">.</span><span class="n">padding</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">ci</span><span class="o">-&gt;</span><span class="n">ci_essiv_tfm</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 如果包含 ci_essiv_tfm，执行 ESSIV（Encrypted Salt-Sector Initialization Vector）操作
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="nf">crypto_cipher_encrypt_one</span><span class="p">(</span><span class="n">ci</span><span class="o">-&gt;</span><span class="n">ci_essiv_tfm</span><span class="p">,</span> <span class="p">(</span><span class="n">u8</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">iv</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">					  <span class="p">(</span><span class="n">u8</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">iv</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="n">req</span> <span class="o">=</span> <span class="nf">skcipher_request_alloc</span><span class="p">(</span><span class="n">tfm</span><span class="p">,</span> <span class="n">gfp_flags</span><span class="p">);</span> <span class="c1">// 分配加密请求结构req，用于向加密引擎提交请求
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="nf">skcipher_request_set_callback</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">		<span class="n">req</span><span class="p">,</span> <span class="n">CRYPTO_TFM_REQ_MAY_BACKLOG</span> <span class="o">|</span> <span class="n">CRYPTO_TFM_REQ_MAY_SLEEP</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="n">crypto_req_done</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">wait</span><span class="p">);</span> <span class="c1">// 设置req的回调函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  
+</span></span><span class="line"><span class="cl">	<span class="c1">// 初始化两个散列列表dst和src，分别用于目标页面和源页面。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nf">sg_init_table</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dst</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">sg_set_page</span><span class="p">(</span><span class="o">&amp;</span><span class="n">dst</span><span class="p">,</span> <span class="n">dest_page</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">offs</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">sg_init_table</span><span class="p">(</span><span class="o">&amp;</span><span class="n">src</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">sg_set_page</span><span class="p">(</span><span class="o">&amp;</span><span class="n">src</span><span class="p">,</span> <span class="n">src_page</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="n">offs</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">	<span class="nf">skcipher_request_set_crypt</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">src</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">dst</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">iv</span><span class="p">);</span> <span class="c1">// 设置加密请求的参数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="p">(</span><span class="n">rw</span> <span class="o">==</span> <span class="n">FS_DECRYPT</span><span class="p">)</span> <span class="c1">// 解密
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="n">res</span> <span class="o">=</span> <span class="nf">crypto_wait_req</span><span class="p">(</span><span class="nf">crypto_skcipher_decrypt</span><span class="p">(</span><span class="n">req</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">wait</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">else</span> <span class="c1">// 加密
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="n">res</span> <span class="o">=</span> <span class="nf">crypto_wait_req</span><span class="p">(</span><span class="nf">crypto_skcipher_encrypt</span><span class="p">(</span><span class="n">req</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">wait</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">skcipher_request_free</span><span class="p">(</span><span class="n">req</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h3 id="read">read</h3>
+<h4 id="f2fs_mpage_readpages">f2fs_mpage_readpages</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">int</span> <span class="nf">f2fs_mpage_readpages</span><span class="p">(</span><span class="k">struct</span> <span class="n">address_space</span> <span class="o">*</span><span class="n">mapping</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			<span class="k">struct</span> <span class="n">list_head</span> <span class="o">*</span><span class="n">pages</span><span class="p">,</span> <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			<span class="kt">unsigned</span> <span class="n">nr_pages</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">is_readahead</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="p">...</span>
+</span></span><span class="line"><span class="cl">	<span class="c1">// 循环遍历要读取的page
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">for</span> <span class="p">(;</span> <span class="n">nr_pages</span><span class="p">;</span> <span class="n">nr_pages</span><span class="o">--</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="p">(</span><span class="n">pages</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 如果是读取多个page，则pages不为空，从list里面读取每一次的page结构
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="n">page</span> <span class="o">=</span> <span class="nf">list_last_entry</span><span class="p">(</span><span class="n">pages</span><span class="p">,</span> <span class="k">struct</span> <span class="n">page</span><span class="p">,</span> <span class="n">lru</span><span class="p">);</span> 
+</span></span><span class="line"><span class="cl">			<span class="nf">prefetchw</span><span class="p">(</span><span class="o">&amp;</span><span class="n">page</span><span class="o">-&gt;</span><span class="n">flags</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">			<span class="nf">list_del</span><span class="p">(</span><span class="o">&amp;</span><span class="n">page</span><span class="o">-&gt;</span><span class="n">lru</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">			<span class="k">if</span> <span class="p">(</span><span class="nf">add_to_page_cache_lru</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">mapping</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">						  <span class="n">page</span><span class="o">-&gt;</span><span class="n">index</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">						  <span class="nf">readahead_gfp_mask</span><span class="p">(</span><span class="n">mapping</span><span class="p">)))</span>
+</span></span><span class="line"><span class="cl">				<span class="k">goto</span> <span class="n">next_page</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="n">block_in_file</span> <span class="o">=</span> <span class="p">(</span><span class="kt">sector_t</span><span class="p">)</span><span class="n">page</span><span class="o">-&gt;</span><span class="n">index</span><span class="p">;</span>  <span class="c1">// 逻辑块号
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="n">last_block</span> <span class="o">=</span> <span class="n">block_in_file</span> <span class="o">+</span> <span class="n">nr_pages</span><span class="p">;</span>	
+</span></span><span class="line"><span class="cl">		<span class="n">last_block_in_file</span> <span class="o">=</span> <span class="p">(</span><span class="nf">i_size_read</span><span class="p">(</span><span class="n">inode</span><span class="p">)</span> <span class="o">+</span> <span class="n">blocksize</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&gt;&gt;</span>
+</span></span><span class="line"><span class="cl">								<span class="n">blkbits</span><span class="p">;</span> <span class="c1">// 最后一个块的块号
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">if</span> <span class="p">(</span><span class="n">last_block</span> <span class="o">&gt;</span> <span class="n">last_block_in_file</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="n">last_block</span> <span class="o">=</span> <span class="n">last_block_in_file</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm"> 		 * map.m_lblk是上一个block_in_file
+</span></span></span><span class="line"><span class="cl"><span class="cm"> 		 * map.m_lblk + map.m_len是需要读取长度的最后一个blokaddr
+</span></span></span><span class="line"><span class="cl"><span class="cm"> 		 * 因此这里的意思是，如果是在这个 map.m_lblk &lt; block_in_file &lt; map.m_lblk + map.m_len 
+</span></span></span><span class="line"><span class="cl"><span class="cm"> 		 * 这个范围里面，不需要map，直接将上次的blkaddr+1就是需要的地址
+</span></span></span><span class="line"><span class="cl"><span class="cm"> 		 * 
+</span></span></span><span class="line"><span class="cl"><span class="cm">		 */</span>
+</span></span><span class="line"><span class="cl">		<span class="c1">// 如果上一次找到了page，则跳到 got_it 通过bio获取page的具体数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">if</span> <span class="p">((</span><span class="n">map</span><span class="p">.</span><span class="n">m_flags</span> <span class="o">&amp;</span> <span class="n">F2FS_MAP_MAPPED</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+</span></span><span class="line"><span class="cl">				<span class="n">block_in_file</span> <span class="o">&gt;</span> <span class="n">map</span><span class="p">.</span><span class="n">m_lblk</span> <span class="o">&amp;&amp;</span>
+</span></span><span class="line"><span class="cl">				<span class="n">block_in_file</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">map</span><span class="p">.</span><span class="n">m_lblk</span> <span class="o">+</span> <span class="n">map</span><span class="p">.</span><span class="n">m_len</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">			<span class="k">goto</span> <span class="n">got_it</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="n">map</span><span class="p">.</span><span class="n">m_flags</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="c1">// 使用page offset和length，通过f2fs_map_blocks获得物理地址
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">if</span> <span class="p">(</span><span class="n">block_in_file</span> <span class="o">&lt;</span> <span class="n">last_block</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="n">map</span><span class="p">.</span><span class="n">m_lblk</span> <span class="o">=</span> <span class="n">block_in_file</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">			<span class="n">map</span><span class="p">.</span><span class="n">m_len</span> <span class="o">=</span> <span class="n">last_block</span> <span class="o">-</span> <span class="n">block_in_file</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">			<span class="k">if</span> <span class="p">(</span><span class="nf">f2fs_map_blocks</span><span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">map</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">						<span class="n">F2FS_GET_BLOCK_DEFAULT</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">				<span class="k">goto</span> <span class="n">set_error_page</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nl">got_it</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// 通过map的结果执行不一样的处理方式
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">if</span> <span class="p">((</span><span class="n">map</span><span class="p">.</span><span class="n">m_flags</span> <span class="o">&amp;</span> <span class="n">F2FS_MAP_MAPPED</span><span class="p">))</span> <span class="p">{</span> <span class="c1">// 如果找到了地址，则计算block_nr得到磁盘的地址
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="n">block_nr</span> <span class="o">=</span> <span class="n">map</span><span class="p">.</span><span class="n">m_pblk</span> <span class="o">+</span> <span class="n">block_in_file</span> <span class="o">-</span> <span class="n">map</span><span class="p">.</span><span class="n">m_lblk</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">			<span class="nf">SetPageMappedToDisk</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="c1">// 获取失败了，则跳过这个page
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="nf">zero_user_segment</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">PAGE_SIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">			<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nf">PageUptodate</span><span class="p">(</span><span class="n">page</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">				<span class="nf">SetPageUptodate</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">			<span class="nf">unlock_page</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">			<span class="k">goto</span> <span class="n">next_page</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm">		 * 这部分开始用于将物理地址通过submit_bio提交到磁盘读取数据
+</span></span></span><span class="line"><span class="cl"><span class="cm">		 * 由于从磁盘读取数据是一个相对耗时的操作，
+</span></span></span><span class="line"><span class="cl"><span class="cm">		 * 因此显然每读取一个页就访问一次磁盘一次的方式是低效的且影响读性能的，
+</span></span></span><span class="line"><span class="cl"><span class="cm">		 * 所以F2FS会尽量一次性提交多个页到磁盘读取数据，以提高性能。
+</span></span></span><span class="line"><span class="cl"><span class="cm">		 * 
+</span></span></span><span class="line"><span class="cl"><span class="cm">		 * 这部分开始就是具体实现:
+</span></span></span><span class="line"><span class="cl"><span class="cm">		 * 1. 创建一个bio(最大一次性提交256个页)
+</span></span></span><span class="line"><span class="cl"><span class="cm">		 * 2. 将需要读取的页添加到这个bio中，
+</span></span></span><span class="line"><span class="cl"><span class="cm">		 *     ------如果bio未满则将page添加到bio中
+</span></span></span><span class="line"><span class="cl"><span class="cm">		 *     ------如果bio满了立即访问磁盘读取
+</span></span></span><span class="line"><span class="cl"><span class="cm">		 *     ------如果循环结束以后，bio还是未满，则通过本函数末尾的操作提交未满的bio。
+</span></span></span><span class="line"><span class="cl"><span class="cm">		 *     
+</span></span></span><span class="line"><span class="cl"><span class="cm">     */</span>
+</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="p">(</span><span class="n">bio</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">last_block_in_bio</span> <span class="o">!=</span> <span class="n">block_nr</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">||</span>
+</span></span><span class="line"><span class="cl">			<span class="o">!</span><span class="nf">__same_bdev</span><span class="p">(</span><span class="nf">F2FS_I_SB</span><span class="p">(</span><span class="n">inode</span><span class="p">),</span> <span class="n">block_nr</span><span class="p">,</span> <span class="n">bio</span><span class="p">)))</span> <span class="p">{</span> <span class="c1">//判断bio装的page是否到了设定的最大数量，如果到了最大值则先发送到磁盘
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nl">submit_and_realloc</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">			<span class="nf">__submit_bio</span><span class="p">(</span><span class="nf">F2FS_I_SB</span><span class="p">(</span><span class="n">inode</span><span class="p">),</span> <span class="n">bio</span><span class="p">,</span> <span class="n">DATA</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">			<span class="n">bio</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="p">(</span><span class="n">bio</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 如果bio是空，则创建一个用于读取的bio
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="n">bio</span> <span class="o">=</span> <span class="nf">f2fs_grab_read_bio</span><span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="n">block_nr</span><span class="p">,</span> <span class="n">nr_pages</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">					<span class="n">is_readahead</span> <span class="o">?</span> <span class="nl">REQ_RAHEAD</span> <span class="p">:</span> <span class="mi">0</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="p">(</span><span class="nf">bio_add_page</span><span class="p">(</span><span class="n">bio</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">blocksize</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">blocksize</span><span class="p">)</span> <span class="c1">// 往bio中添加page
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="k">goto</span> <span class="n">submit_and_realloc</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">		<span class="n">last_block_in_bio</span> <span class="o">=</span> <span class="n">block_nr</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="k">goto</span> <span class="n">next_page</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nl">set_error_page</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">		<span class="nf">SetPageError</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="nf">zero_user_segment</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">PAGE_SIZE</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="nf">unlock_page</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="k">goto</span> <span class="n">next_page</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nl">confused</span><span class="p">:</span> <span class="c1">// 特殊情况进行submit bio
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">if</span> <span class="p">(</span><span class="n">bio</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">			<span class="nf">__submit_bio</span><span class="p">(</span><span class="nf">F2FS_I_SB</span><span class="p">(</span><span class="n">inode</span><span class="p">),</span> <span class="n">bio</span><span class="p">,</span> <span class="n">DATA</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">			<span class="n">bio</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">		<span class="nf">unlock_page</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="nl">next_page</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="p">(</span><span class="n">pages</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">			<span class="nf">put_page</span><span class="p">(</span><span class="n">page</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">BUG_ON</span><span class="p">(</span><span class="n">pages</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nf">list_empty</span><span class="p">(</span><span class="n">pages</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 如果还有bio没有处理，例如读取的页遍历完以后，还没有达到要求的bio的最大保存页数，就会在这里提交bio到磁盘读取
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="p">(</span><span class="n">bio</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="nf">__submit_bio</span><span class="p">(</span><span class="nf">F2FS_I_SB</span><span class="p">(</span><span class="n">inode</span><span class="p">),</span> <span class="n">bio</span><span class="p">,</span> <span class="n">DATA</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h4 id="f2fs_grab_read_bio">f2fs_grab_read_bio</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="k">struct</span> <span class="n">bio</span> <span class="o">*</span><span class="nf">f2fs_grab_read_bio</span><span class="p">(</span><span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">inode</span><span class="p">,</span> <span class="kt">block_t</span> <span class="n">blkaddr</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">					<span class="kt">unsigned</span> <span class="n">nr_pages</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="n">op_flag</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="n">bio</span> <span class="o">=</span> <span class="nf">f2fs_bio_alloc</span><span class="p">(</span><span class="n">sbi</span><span class="p">,</span> <span class="kt">min_t</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="n">nr_pages</span><span class="p">,</span> <span class="n">BIO_MAX_PAGES</span><span class="p">),</span> <span class="nb">false</span><span class="p">);</span> <span class="c1">// 分配并初始化一个 bio 结构
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="nf">f2fs_target_device</span><span class="p">(</span><span class="n">sbi</span><span class="p">,</span> <span class="n">blkaddr</span><span class="p">,</span> <span class="n">bio</span><span class="p">);</span> <span class="c1">// 为 bio 设置目标设备，这个设备用于读取数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="n">bio</span><span class="o">-&gt;</span><span class="n">bi_end_io</span> <span class="o">=</span> <span class="n">f2fs_read_end_io</span><span class="p">;</span> <span class="c1">// 设置 bio 的 bi_end_io 回调函数，在 bio 操作完成后被调用
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nf">bio_set_op_attrs</span><span class="p">(</span><span class="n">bio</span><span class="p">,</span> <span class="n">REQ_OP_READ</span><span class="p">,</span> <span class="n">op_flag</span><span class="p">);</span> <span class="c1">// 给 bio 设置读取属性
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="p">(</span><span class="nf">f2fs_encrypted_file</span><span class="p">(</span><span class="n">inode</span><span class="p">))</span> <span class="c1">// 如果是加密文件，则启用后处理步骤来解密数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="n">post_read_steps</span> <span class="o">|=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">STEP_DECRYPT</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="n">post_read_steps</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="n">ctx</span> <span class="o">=</span> <span class="nf">mempool_alloc</span><span class="p">(</span><span class="n">bio_post_read_ctx_pool</span><span class="p">,</span> <span class="n">GFP_NOFS</span><span class="p">);</span> <span class="c1">// 分配一个用于后处理的上下文结构 ctx
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="n">ctx</span><span class="o">-&gt;</span><span class="n">bio</span> <span class="o">=</span> <span class="n">bio</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="n">ctx</span><span class="o">-&gt;</span><span class="n">enabled_steps</span> <span class="o">=</span> <span class="n">post_read_steps</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="n">bio</span><span class="o">-&gt;</span><span class="n">bi_private</span> <span class="o">=</span> <span class="n">ctx</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="nf">f2fs_wait_on_block_writeback</span><span class="p">(</span><span class="n">sbi</span><span class="p">,</span> <span class="n">blkaddr</span><span class="p">);</span> <span class="c1">// 等待块数据的写回操作完成
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="n">bio</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h4 id="f2fs_read_end_io">f2fs_read_end_io</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">f2fs_read_end_io</span><span class="p">(</span><span class="k">struct</span> <span class="n">bio</span> <span class="o">*</span><span class="n">bio</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="nf">time_to_inject</span><span class="p">(</span><span class="nf">F2FS_P_SB</span><span class="p">(</span><span class="nf">bio_first_page_all</span><span class="p">(</span><span class="n">bio</span><span class="p">)),</span> <span class="n">FAULT_IO</span><span class="p">))</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nf">f2fs_show_injection_info</span><span class="p">(</span><span class="n">FAULT_IO</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">		<span class="n">bio</span><span class="o">-&gt;</span><span class="n">bi_status</span> <span class="o">=</span> <span class="n">BLK_STS_IOERR</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="nf">f2fs_bio_post_read_required</span><span class="p">(</span><span class="n">bio</span><span class="p">))</span> <span class="p">{</span> <span class="c1">// 检查是否需要进行后处理
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">struct</span> <span class="n">bio_post_read_ctx</span> <span class="o">*</span><span class="n">ctx</span> <span class="o">=</span> <span class="n">bio</span><span class="o">-&gt;</span><span class="n">bi_private</span><span class="p">;</span> <span class="c1">// 获取之前设置的用于后处理的上下文结构
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="n">ctx</span><span class="o">-&gt;</span><span class="n">cur_step</span> <span class="o">=</span> <span class="n">STEP_INITIAL</span><span class="p">;</span> <span class="c1">// 将后处理步骤的当前状态初始化为初始步骤
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="nf">bio_post_read_processing</span><span class="p">(</span><span class="n">ctx</span><span class="p">);</span> <span class="c1">// 进行后处理工作
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nf">__read_end_io</span><span class="p">(</span><span class="n">bio</span><span class="p">);</span> <span class="c1">// 结束bio read
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></div><h4 id="bio_post_read_processing">bio_post_read_processing</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">bio_post_read_processing</span><span class="p">(</span><span class="k">struct</span> <span class="n">bio_post_read_ctx</span> <span class="o">*</span><span class="n">ctx</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">switch</span> <span class="p">(</span><span class="o">++</span><span class="n">ctx</span><span class="o">-&gt;</span><span class="n">cur_step</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 将当前的状态值自增
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">case</span> <span class="nl">STEP_DECRYPT</span><span class="p">:</span> <span class="c1">// 如果当前步骤是解密步骤
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">if</span> <span class="p">(</span><span class="n">ctx</span><span class="o">-&gt;</span><span class="n">enabled_steps</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">STEP_DECRYPT</span><span class="p">))</span> <span class="p">{</span> <span class="c1">// 检查是否启用了解密步骤
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="nf">INIT_WORK</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ctx</span><span class="o">-&gt;</span><span class="n">work</span><span class="p">,</span> <span class="n">decrypt_work</span><span class="p">);</span> <span class="c1">// 初始化一个工作队列项，并指定要在工作队列中执行的函数为 decrypt_work
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="nf">fscrypt_enqueue_decrypt_work</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ctx</span><span class="o">-&gt;</span><span class="n">work</span><span class="p">);</span> <span class="c1">// 添加到解密工作队列中，以便后续在工作队列上异步执行解密操作
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="k">return</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">		<span class="p">}</span>
+</span></span><span class="line"><span class="cl">		<span class="n">ctx</span><span class="o">-&gt;</span><span class="n">cur_step</span><span class="o">++</span><span class="p">;</span>  <span class="c1">// 自增状态值
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="cm">/* fall-through */</span>
+</span></span><span class="line"><span class="cl">	<span class="k">default</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">		<span class="nf">__read_end_io</span><span class="p">(</span><span class="n">ctx</span><span class="o">-&gt;</span><span class="n">bio</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h4 id="decrypt_work">decrypt_work</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">decrypt_work</span><span class="p">(</span><span class="k">struct</span> <span class="n">work_struct</span> <span class="o">*</span><span class="n">work</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">bio_post_read_ctx</span> <span class="o">*</span><span class="n">ctx</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">		<span class="nf">container_of</span><span class="p">(</span><span class="n">work</span><span class="p">,</span> <span class="k">struct</span> <span class="n">bio_post_read_ctx</span><span class="p">,</span> <span class="n">work</span><span class="p">);</span> <span class="c1">// 从给定的工作项（work）中获取关联的后处理上下文结构（ctx）
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="nf">fscrypt_decrypt_bio</span><span class="p">(</span><span class="n">ctx</span><span class="o">-&gt;</span><span class="n">bio</span><span class="p">);</span> <span class="c1">// 对 bio 中的数据进行解密操作
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="nf">bio_post_read_processing</span><span class="p">(</span><span class="n">ctx</span><span class="p">);</span> <span class="c1">// 控制返回到主后处理函数，以便继续执行其他后处理步骤或完成读取 bio 操作的处理
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></div><h4 id="fscrypt_decrypt_bio--__fscrypt_decrypt_bio">fscrypt_decrypt_bio &amp; __fscrypt_decrypt_bio</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">static</span> <span class="kt">void</span> <span class="nf">__fscrypt_decrypt_bio</span><span class="p">(</span><span class="k">struct</span> <span class="n">bio</span> <span class="o">*</span><span class="n">bio</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">done</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">struct</span> <span class="n">bio_vec</span> <span class="o">*</span><span class="n">bv</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">	<span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nf">bio_for_each_segment_all</span><span class="p">(</span><span class="n">bv</span><span class="p">,</span> <span class="n">bio</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 遍历bio中的每个数据段。对于每个数据段
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span> <span class="o">=</span> <span class="n">bv</span><span class="o">-&gt;</span><span class="n">bv_page</span><span class="p">;</span> <span class="c1">// 获取当前数据段所属的page
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="kt">int</span> <span class="n">ret</span> <span class="o">=</span> <span class="nf">fscrypt_decrypt_page</span><span class="p">(</span><span class="n">page</span><span class="o">-&gt;</span><span class="n">mapping</span><span class="o">-&gt;</span><span class="n">host</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				<span class="n">PAGE_SIZE</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">page</span><span class="o">-&gt;</span><span class="n">index</span><span class="p">);</span> <span class="c1">// 解密给定page中的数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		
+</span></span><span class="line"><span class="cl">    <span class="p">...</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kt">void</span> <span class="nf">fscrypt_decrypt_bio</span><span class="p">(</span><span class="k">struct</span> <span class="n">bio</span> <span class="o">*</span><span class="n">bio</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nf">__fscrypt_decrypt_bio</span><span class="p">(</span><span class="n">bio</span><span class="p">,</span> <span class="nb">false</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><h4 id="fscrypt_decrypt_page">fscrypt_decrypt_page</h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">fscrypt_decrypt_page</span><span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">inode</span> <span class="o">*</span><span class="n">inode</span><span class="p">,</span> <span class="k">struct</span> <span class="n">page</span> <span class="o">*</span><span class="n">page</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">			<span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">len</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">offs</span><span class="p">,</span> <span class="n">u64</span> <span class="n">lblk_num</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="n">inode</span><span class="o">-&gt;</span><span class="n">i_sb</span><span class="o">-&gt;</span><span class="n">s_cop</span><span class="o">-&gt;</span><span class="n">flags</span> <span class="o">&amp;</span> <span class="n">FS_CFLG_OWN_PAGES</span><span class="p">))</span> <span class="c1">// 检查文件系统是否拥有页面
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="nf">BUG_ON</span><span class="p">(</span><span class="o">!</span><span class="nf">PageLocked</span><span class="p">(</span><span class="n">page</span><span class="p">));</span> <span class="c1">// 如果页面没有锁定，触发BUG_ON
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="nf">fscrypt_do_page_crypto</span><span class="p">(</span><span class="n">inode</span><span class="p">,</span> <span class="n">FS_DECRYPT</span><span class="p">,</span> <span class="n">lblk_num</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">				      <span class="n">len</span><span class="p">,</span> <span class="n">offs</span><span class="p">,</span> <span class="n">GFP_NOFS</span><span class="p">);</span> <span class="c1">// 执行页的解密操作
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></div><h4 id="fscrypt_do_page_crypto-1">fscrypt_do_page_crypto</h4>
+<p>见write</p></article>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script type="application/javascript" src='https://blog.hhui.me/js/toc.js'></script>
+<link rel="stylesheet" href='https://blog.hhui.me/css/toc.css' />
+
+
+  <div class="footer container-xl width-full p-responsive">
+  <div
+    class="position-relative d-flex flex-row-reverse flex-lg-row flex-wrap flex-lg-nowrap flex-justify-center flex-lg-justify-between flex-sm-items-center pt-6 pb-2 mt-6 f6 text-gray border-top border-gray-light ">
+    <a aria-label="Homepage" title="GitHub" class="footer-octicon d-none d-lg-block mr-lg-4" href="https://blog.hhui.me">
+      <svg height="24" class="octicon octicon-mark-github" viewBox="0 0 16 16" version="1.1" width="24">
+        <path fill-rule="evenodd"
+          d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+        </path>
+      </svg>
+    </a>
+    <ul class="list-style-none d-flex flex-wrap col-12 flex-justify-center flex-lg-justify-between mb-2 mb-lg-0">
+      
+      <li class="mr-3 mr-lg-0">Theme by <a href='https://github.com/MeiK2333/github-style'>github-style</a></li>
+      
+    </ul>
+  </div>
+  <div class="d-flex flex-justify-center pb-6">
+    <span class="f6 text-gray-light"></span>
+  </div>
+
+
+</div>
+</body>
+
+<script type="application/javascript" src="https://blog.hhui.me/js/github-style.js"></script>
+
+
+
+
+</html>
