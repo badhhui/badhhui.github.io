@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <script type="application/javascript" src='https://blog.hhui.me/js/theme-mode.js'></script>
+    <link rel="stylesheet" href='https://blog.hhui.me/css/frameworks.min.css' />
+    <link rel="stylesheet" href='https://blog.hhui.me/css/github.min.css' />
+    <link rel="stylesheet" href='https://blog.hhui.me/css/github-style.css' />
+    <link rel="stylesheet" href='https://blog.hhui.me/css/light.css' />
+    <link rel="stylesheet" href='https://blog.hhui.me/css/dark.css' />
+    <link rel="stylesheet" href='https://blog.hhui.me/css/syntax.css' />
+    <title> - Hhui&#39;s blog</title>
+    
+    <link rel="icon" type="image/x-icon" href='/images/github.png'>
+    
+    <meta name="theme-color" content="#1e2327">
+
+    
+    <meta name="description"
+  content="要点和贡献 目的：本文介绍了一种新颖的移动设备加密重复数据删除方法，称为FBEDedup（基于文件的加密重复数据删除），该方法在保证重复数据删除的同时有效处理移动设备的特定加密特性。 方法：FBEDedup 将加密和重复数据删除集成到移动操作系统（如 Linux 和 Android）的文件系统中，从而最大限度地减少系统修改并降低数据泄露风险。 关键组件：该系统包括两个主要组件：加密处理程序和重复数据删除处理程序，它们集成在一起以确保数据完整性和安全性。 效率和安全性：该方法允许内联重复数据删除，而不会影响安全性。它使用哈希函数进行数据块指纹识别，以有效管理冗余数据。 实现和评估：FBEDedup 在 F2FS 上实现并使用 FIO 进行评估，与标准 F2FS 相比，在重复数据删除方面表现出良好的性能和效率. 优势 创新方法：FBEDedup 提出了一种在移动系统中进行加密重复数据删除的新颖方法，解决了当前方法中不适合存储有限的单用户移动设备的空白。 集成系统设计：将加密和重复数据删除集成到移动操作系统的文件系统中，减少了对系统进行大量修改的需要。 效率和安全性平衡：密钥适配器组件内各种策略的开发平衡了重复数据删除效率、系统性能和安全性问题。 综合评估：使用模拟移动平台和真实数据进行全面评估，证明系统的有效性。 适应性和未来范围：该系统显示出跨不同文件系统的适应性潜力，并计划在未来版本中支持 EXT4. 弱点 内存开销：系统需要在内存中维护一些元数据以进行定期重复数据删除操作，从而导致潜在的内存开销问题。 当前适应性有限：FBEDedup 目前仅适用于 F2FS 文件系统，限制了其对移动设备中使用的其他文件系统的直接适用性。 某些场景下的性能开销：虽然系统总体性能良好，但与未修改的 F2FS 和仅启用加密的 F2FS 相比，性能开销较小，特别是在高强度数据流中。 密钥管理中的潜在安全风险：虽然本文解决了安全问题，但重复数据删除的密钥管理所涉及的复杂性可能会带来潜在的安全风险. 对作者的提问和反驳建议 内存开销的处理：所提出的交换机制如何解决内存开销问题，以及它对系统性能有何影响？ 各种工作负载中的性能：您能否提供有关 FBEDedup 在各种实际工作负载下的性能的更多见解，特别是考虑到不同的用户行为和数据类型？ 密钥管理策略的安全影响：您能否详细说明本文中提出的不同密钥适配器策略的安全影响，特别是在存在潜在漏洞或攻击场景的情况下？ 对其他文件系统的适应性：使 FBEDedup 适应其他文件系统（如 EXT4）的挑战和潜在解决方案是什么，这可能会如何影响其性能和安全功能？ 总体得分 7/10。FBEDedup 提出了一种在加密移动系统中进行重复数据删除的创新方法，解决了当前方法中的重大缺陷，并展示了高效、安全的数据管理的潜力。然而，对内存开销、有限的当前适应性以及密钥管理策略中潜在的安全风险的担忧略微限制了其直接适用性和可扩展性。" />
+<meta name="keywords"
+  content='blog, google analytics' />
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="https://blog.hhui.me/post/%E8%A6%81%E7%82%B9%E5%92%8C%E8%B4%A1%E7%8C%AE/" />
+
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content=" - Hhui&#39;s blog" />
+<meta name="twitter:description"
+  content="要点和贡献 目的：本文介绍了一种新颖的移动设备加密重复数据删除方法，称为FBEDedup（基于文件的加密重复数据删除），该方法在保证重复数据删除的同时有效处理移动设备的特定加密特性。 方法：FBEDedup 将加密和重复数据删除集成到移动操作系统（如 Linux 和 Android）的文件系统中，从而最大限度地减少系统修改并降低数据泄露风险。 关键组件：该系统包括两个主要组件：加密处理程序和重复数据删除处理程序，它们集成在一起以确保数据完整性和安全性。 效率和安全性：该方法允许内联重复数据删除，而不会影响安全性。它使用哈希函数进行数据块指纹识别，以有效管理冗余数据。 实现和评估：FBEDedup 在 F2FS 上实现并使用 FIO 进行评估，与标准 F2FS 相比，在重复数据删除方面表现出良好的性能和效率. 优势 创新方法：FBEDedup 提出了一种在移动系统中进行加密重复数据删除的新颖方法，解决了当前方法中不适合存储有限的单用户移动设备的空白。 集成系统设计：将加密和重复数据删除集成到移动操作系统的文件系统中，减少了对系统进行大量修改的需要。 效率和安全性平衡：密钥适配器组件内各种策略的开发平衡了重复数据删除效率、系统性能和安全性问题。 综合评估：使用模拟移动平台和真实数据进行全面评估，证明系统的有效性。 适应性和未来范围：该系统显示出跨不同文件系统的适应性潜力，并计划在未来版本中支持 EXT4. 弱点 内存开销：系统需要在内存中维护一些元数据以进行定期重复数据删除操作，从而导致潜在的内存开销问题。 当前适应性有限：FBEDedup 目前仅适用于 F2FS 文件系统，限制了其对移动设备中使用的其他文件系统的直接适用性。 某些场景下的性能开销：虽然系统总体性能良好，但与未修改的 F2FS 和仅启用加密的 F2FS 相比，性能开销较小，特别是在高强度数据流中。 密钥管理中的潜在安全风险：虽然本文解决了安全问题，但重复数据删除的密钥管理所涉及的复杂性可能会带来潜在的安全风险. 对作者的提问和反驳建议 内存开销的处理：所提出的交换机制如何解决内存开销问题，以及它对系统性能有何影响？ 各种工作负载中的性能：您能否提供有关 FBEDedup 在各种实际工作负载下的性能的更多见解，特别是考虑到不同的用户行为和数据类型？ 密钥管理策略的安全影响：您能否详细说明本文中提出的不同密钥适配器策略的安全影响，特别是在存在潜在漏洞或攻击场景的情况下？ 对其他文件系统的适应性：使 FBEDedup 适应其他文件系统（如 EXT4）的挑战和潜在解决方案是什么，这可能会如何影响其性能和安全功能？ 总体得分 7/10。FBEDedup 提出了一种在加密移动系统中进行重复数据删除的创新方法，解决了当前方法中的重大缺陷，并展示了高效、安全的数据管理的潜力。然而，对内存开销、有限的当前适应性以及密钥管理策略中潜在的安全风险的担忧略微限制了其直接适用性和可扩展性。" />
+<meta name="twitter:site" content="https://blog.hhui.me" />
+<meta name="twitter:creator" content="" />
+<meta name="twitter:image"
+  content="https://blog.hhui.me">
+
+
+<meta property="og:type" content="article" />
+<meta property="og:title" content=" - Hhui&#39;s blog">
+<meta property="og:description"
+  content="要点和贡献 目的：本文介绍了一种新颖的移动设备加密重复数据删除方法，称为FBEDedup（基于文件的加密重复数据删除），该方法在保证重复数据删除的同时有效处理移动设备的特定加密特性。 方法：FBEDedup 将加密和重复数据删除集成到移动操作系统（如 Linux 和 Android）的文件系统中，从而最大限度地减少系统修改并降低数据泄露风险。 关键组件：该系统包括两个主要组件：加密处理程序和重复数据删除处理程序，它们集成在一起以确保数据完整性和安全性。 效率和安全性：该方法允许内联重复数据删除，而不会影响安全性。它使用哈希函数进行数据块指纹识别，以有效管理冗余数据。 实现和评估：FBEDedup 在 F2FS 上实现并使用 FIO 进行评估，与标准 F2FS 相比，在重复数据删除方面表现出良好的性能和效率. 优势 创新方法：FBEDedup 提出了一种在移动系统中进行加密重复数据删除的新颖方法，解决了当前方法中不适合存储有限的单用户移动设备的空白。 集成系统设计：将加密和重复数据删除集成到移动操作系统的文件系统中，减少了对系统进行大量修改的需要。 效率和安全性平衡：密钥适配器组件内各种策略的开发平衡了重复数据删除效率、系统性能和安全性问题。 综合评估：使用模拟移动平台和真实数据进行全面评估，证明系统的有效性。 适应性和未来范围：该系统显示出跨不同文件系统的适应性潜力，并计划在未来版本中支持 EXT4. 弱点 内存开销：系统需要在内存中维护一些元数据以进行定期重复数据删除操作，从而导致潜在的内存开销问题。 当前适应性有限：FBEDedup 目前仅适用于 F2FS 文件系统，限制了其对移动设备中使用的其他文件系统的直接适用性。 某些场景下的性能开销：虽然系统总体性能良好，但与未修改的 F2FS 和仅启用加密的 F2FS 相比，性能开销较小，特别是在高强度数据流中。 密钥管理中的潜在安全风险：虽然本文解决了安全问题，但重复数据删除的密钥管理所涉及的复杂性可能会带来潜在的安全风险. 对作者的提问和反驳建议 内存开销的处理：所提出的交换机制如何解决内存开销问题，以及它对系统性能有何影响？ 各种工作负载中的性能：您能否提供有关 FBEDedup 在各种实际工作负载下的性能的更多见解，特别是考虑到不同的用户行为和数据类型？ 密钥管理策略的安全影响：您能否详细说明本文中提出的不同密钥适配器策略的安全影响，特别是在存在潜在漏洞或攻击场景的情况下？ 对其他文件系统的适应性：使 FBEDedup 适应其他文件系统（如 EXT4）的挑战和潜在解决方案是什么，这可能会如何影响其性能和安全功能？ 总体得分 7/10。FBEDedup 提出了一种在加密移动系统中进行重复数据删除的创新方法，解决了当前方法中的重大缺陷，并展示了高效、安全的数据管理的潜力。然而，对内存开销、有限的当前适应性以及密钥管理策略中潜在的安全风险的担忧略微限制了其直接适用性和可扩展性。" />
+<meta property="og:url" content="https://blog.hhui.me/post/%E8%A6%81%E7%82%B9%E5%92%8C%E8%B4%A1%E7%8C%AE/" />
+<meta property="og:site_name" content="" />
+<meta property="og:image"
+  content="https://blog.hhui.me">
+<meta property="og:image:width" content="2048">
+<meta property="og:image:height" content="1024">
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body>
+  <div style="position: relative">
+  <header class="Header js-details-container Details px-3 px-md-4 px-lg-5 flex-wrap flex-md-nowrap open Details--on">
+    <div class="Header-item mobile-none" style="margin-top: -4px; margin-bottom: -4px;">
+      <a class="Header-link" href="https://blog.hhui.me">
+        <svg class="octicon" height="32" viewBox="0 0 16 16" version="1.1" width="32">
+          <path fill-rule="evenodd"
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+          </path>
+        </svg>
+      </a>
+    </div>
+    <div class="Header-item d-md-none">
+      <button class="Header-link btn-link js-details-target" type="button"
+        onclick="document.querySelector('#header-search').style.display = document.querySelector('#header-search').style.display == 'none'? 'block': 'none'">
+        <svg height="24" class="octicon octicon-three-bars" viewBox="0 0 16 16" version="1.1" width="24">
+          <path fill-rule="evenodd"
+            d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z">
+          </path>
+        </svg>
+      </button>
+    </div>
+    <div style="display: none;" id="header-search"
+      class="Header-item Header-item--full flex-column flex-md-row width-full flex-order-2 flex-md-order-none mr-0 mr-md-3 mt-3 mt-md-0 Details-content--hidden-not-important d-md-flex">
+      <div
+        class="Header-search header-search flex-auto js-site-search position-relative flex-self-stretch flex-md-self-auto mb-3 mb-md-0 mr-0 mr-md-3 scoped-search site-scoped-search js-jump-to">
+        <div class="position-relative">
+          <form target="_blank" action="https://www.google.com/search" accept-charset="UTF-8" method="get"
+            autocomplete="off">
+            <label
+              class="Header-search-label form-control input-sm header-search-wrapper p-0 js-chromeless-input-container header-search-wrapper-jump-to position-relative d-flex flex-justify-between flex-items-center">
+              <input type="text"
+                class="Header-search-input form-control input-sm header-search-input jump-to-field js-jump-to-field js-site-search-focus js-site-search-field is-clearable"
+                name="q" value="" placeholder="Search" autocomplete="off">
+              <input type="hidden" name="q" value="site:https://blog.hhui.me">
+            </label>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="Header-item Header-item--full flex-justify-center d-md-none position-relative">
+      <a class="Header-link " href="https://blog.hhui.me">
+        <svg class="octicon octicon-mark-github v-align-middle" height="32" viewBox="0 0 16 16" version="1.1"
+          width="32">
+          <path fill-rule="evenodd"
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+          </path>
+        </svg>
+      </a>
+    </div>
+    <div class="Header-item" style="margin-right: 0;">
+      <a href="javascript:void(0)" class="Header-link no-select" onclick="switchTheme()">
+        <svg style="fill: var(--color-profile-color-modes-toggle-moon);" class="no-select" viewBox="0 0 16 16"
+          version="1.1" width="16" height="16">
+          <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M4.52208 7.71754C7.5782 7.71754 10.0557 5.24006 10.0557 2.18394C10.0557 1.93498 10.0392 1.68986 10.0074 1.44961C9.95801 1.07727 10.3495 0.771159 10.6474 0.99992C12.1153 2.12716 13.0615 3.89999 13.0615 5.89383C13.0615 9.29958 10.3006 12.0605 6.89485 12.0605C3.95334 12.0605 1.49286 10.001 0.876728 7.24527C0.794841 6.87902 1.23668 6.65289 1.55321 6.85451C2.41106 7.40095 3.4296 7.71754 4.52208 7.71754Z">
+          </path>
+        </svg>
+      </a>
+    </div>
+  </header>
+</div>
+  
+<div>
+  <main>
+    <div class="gisthead pagehead bg-gray-light pb-0 pt-3 mb-4">
+      <div class="px-0">
+        <div class="mb-3 d-flex px-3 px-md-3 px-lg-5">
+          <div class="flex-auto min-width-0 width-fit mr-3">
+            <div class="d-flex">
+              <div class="d-none d-md-block">
+                <a class="avatar mr-2 flex-shrink-0" href="https://blog.hhui.me">
+                  <img class=" avatar-user"
+                    src="https://blog.hhui.me/images/avatar.png"
+                    width="32" height="32"></a>
+              </div>
+              <div class="d-flex flex-column">
+                <h1 class="break-word f3 text-normal mb-md-0 mb-1">
+                  <span class="author">
+                    <a href="https://blog.hhui.me">Hhui</a></span><span
+                    class="path-divider">/</span><strong class="css-truncate-target mr-1" style="max-width: 410px"><a
+                      href="https://blog.hhui.me/post/%E8%A6%81%E7%82%B9%E5%92%8C%E8%B4%A1%E7%8C%AE/"></a></strong>
+                </h1>
+                <div class="note m-0">
+                  Created <relative-time datetime="Mon, 01 Jan 0001 00:00:00 &#43;0000"
+                    class="no-wrap">
+                    Mon, 01 Jan 0001 00:00:00 &#43;0000</relative-time>
+
+                  
+                  <span class="file-info-divider"></span>
+                  Modified <relative-time datetime="Tue, 21 Nov 2023 18:17:09 &#43;0800"
+                    class="no-wrap">
+                    Tue, 21 Nov 2023 18:17:09 &#43;0800</relative-time>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-lg px-3 new-discussion-timeline">
+      <div class="repository-content gist-content">
+        <div>
+          <div class="js-gist-file-update-container js-task-list-container file-box">
+            <div id="file-pytest" class="file my-2">
+              <div id="post-header" class="file-header d-flex flex-md-items-center flex-items-start sticky-header" style="z-index: 2">
+                <div class="file-info d-flex flex-md-items-center flex-items-start flex-order-1 flex-auto">
+                  <div class="text-mono f6 flex-auto pr-3 flex-order-2 flex-md-order-1 mt-2 mt-md-0">
+                    
+                    <summary id="toc-toggle" onclick="clickToc()" class="btn btn-octicon m-0 mr-2 p-2">
+                      <svg aria-hidden="true" viewBox="0 0 16 16" height="16" width="16" class="octicon octicon-list-unordered">
+                        <path fill-rule="evenodd" d="M2 4a1 1 0 100-2 1 1 0 000 2zm3.75-1.5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zm0 5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zm0 5a.75.75 0 000 1.5h8.5a.75.75 0 000-1.5h-8.5zM3 8a1 1 0 11-2 0 1 1 0 012 0zm-1 6a1 1 0 100-2 1 1 0 000 2z"></path>
+                      </svg>
+                    </summary>
+                    <details-menu class="SelectMenu" id="toc-details" style="display: none;">
+                      <div class="SelectMenu-modal rounded-3 mt-1" style="max-height: 340px;">
+                        <div class="SelectMenu-list SelectMenu-list--borderless p-2" style="overscroll-behavior: contain;" id="toc-list">
+                        </div>
+                      </div>
+                    </details-menu>
+                      1147 Words
+                    
+
+                  </div>
+                  <div class="file-actions flex-order-2 pt-0">
+                    
+                  </div>
+                </div>
+              </div>
+
+
+              <div class="Box-body px-5 pb-5" style="z-index: 1">
+                <article class="markdown-body entry-content container-lg"><h4 id="要点和贡献">要点和贡献</h4>
+<ol>
+<li><strong>目的</strong>：本文介绍了一种新颖的移动设备加密重复数据删除方法，称为FBEDedup（基于文件的加密重复数据删除），该方法在保证重复数据删除的同时有效处理移动设备的特定加密特性。</li>
+<li><strong>方法</strong>：FBEDedup 将加密和重复数据删除集成到移动操作系统（如 Linux 和 Android）的文件系统中，从而最大限度地减少系统修改并降低数据泄露风险。</li>
+<li><strong>关键组件</strong>：该系统包括两个主要组件：加密处理程序和重复数据删除处理程序，它们集成在一起以确保数据完整性和安全性。</li>
+<li><strong>效率和安全性</strong>：该方法允许内联重复数据删除，而不会影响安全性。它使用哈希函数进行数据块指纹识别，以有效管理冗余数据。</li>
+<li><strong>实现和评估</strong>：FBEDedup 在 F2FS 上实现并使用 FIO 进行评估，与标准 F2FS 相比，在重复数据删除方面表现出良好的性能和效率.</li>
+</ol>
+<h4 id="优势">优势</h4>
+<ol>
+<li><strong>创新方法</strong>：FBEDedup 提出了一种在移动系统中进行加密重复数据删除的新颖方法，解决了当前方法中不适合存储有限的单用户移动设备的空白。</li>
+<li><strong>集成系统设计</strong>：将加密和重复数据删除集成到移动操作系统的文件系统中，减少了对系统进行大量修改的需要。</li>
+<li><strong>效率和安全性平衡</strong>：密钥适配器组件内各种策略的开发平衡了重复数据删除效率、系统性能和安全性问题。</li>
+<li><strong>综合评估</strong>：使用模拟移动平台和真实数据进行全面评估，证明系统的有效性。</li>
+<li><strong>适应性和未来范围</strong>：该系统显示出跨不同文件系统的适应性潜力，并计划在未来版本中支持 EXT4.</li>
+</ol>
+<h4 id="弱点">弱点</h4>
+<ol>
+<li><strong>内存开销</strong>：系统需要在内存中维护一些元数据以进行定期重复数据删除操作，从而导致潜在的内存开销问题。</li>
+<li><strong>当前适应性有限</strong>：FBEDedup 目前仅适用于 F2FS 文件系统，限制了其对移动设备中使用的其他文件系统的直接适用性。</li>
+<li><strong>某些场景下的性能开销</strong>：虽然系统总体性能良好，但与未修改的 F2FS 和仅启用加密的 F2FS 相比，性能开销较小，特别是在高强度数据流中。</li>
+<li><strong>密钥管理中的潜在安全风险</strong>：虽然本文解决了安全问题，但重复数据删除的密钥管理所涉及的复杂性可能会带来潜在的安全风险.</li>
+</ol>
+<h4 id="对作者的提问和反驳建议">对作者的提问和反驳建议</h4>
+<ol>
+<li><strong>内存开销的处理</strong>：所提出的交换机制如何解决内存开销问题，以及它对系统性能有何影响？</li>
+<li><strong>各种工作负载中的性能</strong>：您能否提供有关 FBEDedup 在各种实际工作负载下的性能的更多见解，特别是考虑到不同的用户行为和数据类型？</li>
+<li><strong>密钥管理策略的安全影响</strong>：您能否详细说明本文中提出的不同密钥适配器策略的安全影响，特别是在存在潜在漏洞或攻击场景的情况下？</li>
+<li><strong>对其他文件系统的适应性</strong>：使 FBEDedup 适应其他文件系统（如 EXT4）的挑战和潜在解决方案是什么，这可能会如何影响其性能和安全功能？</li>
+</ol>
+<h4 id="总体得分">总体得分</h4>
+<p>7/10。FBEDedup 提出了一种在加密移动系统中进行重复数据删除的创新方法，解决了当前方法中的重大缺陷，并展示了高效、安全的数据管理的潜力。然而，对内存开销、有限的当前适应性以及密钥管理策略中潜在的安全风险的担忧略微限制了其直接适用性和可扩展性。</p>
+</article>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script type="application/javascript" src='https://blog.hhui.me/js/toc.js'></script>
+<link rel="stylesheet" href='https://blog.hhui.me/css/toc.css' />
+
+
+  <div class="footer container-xl width-full p-responsive">
+  <div
+    class="position-relative d-flex flex-row-reverse flex-lg-row flex-wrap flex-lg-nowrap flex-justify-center flex-lg-justify-between flex-sm-items-center pt-6 pb-2 mt-6 f6 text-gray border-top border-gray-light ">
+    <a aria-label="Homepage" title="GitHub" class="footer-octicon d-none d-lg-block mr-lg-4" href="https://blog.hhui.me">
+      <svg height="24" class="octicon octicon-mark-github" viewBox="0 0 16 16" version="1.1" width="24">
+        <path fill-rule="evenodd"
+          d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+        </path>
+      </svg>
+    </a>
+    <ul class="list-style-none d-flex flex-wrap col-12 flex-justify-center flex-lg-justify-between mb-2 mb-lg-0">
+      
+      <li class="mr-3 mr-lg-0">Theme by <a href='https://github.com/MeiK2333/github-style'>github-style</a></li>
+      
+    </ul>
+  </div>
+  <div class="d-flex flex-justify-center pb-6">
+    <span class="f6 text-gray-light"></span>
+  </div>
+
+
+</div>
+</body>
+
+<script type="application/javascript" src="https://blog.hhui.me/js/github-style.js"></script>
+
+
+
+
+</html>
