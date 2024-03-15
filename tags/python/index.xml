@@ -13,10 +13,7 @@
       <pubDate>Fri, 15 Mar 2024 18:45:08 +0800</pubDate>
       
       <guid>https://blog.hhui.me/post/python%E5%B8%B8%E8%A7%81%E6%A0%BC%E5%BC%8F%E5%8C%96%E8%BE%93%E5%87%BA%E6%96%B9%E6%B3%95/</guid>
-      <description>Python格式化输出 如果Python程序中想要让输出格式化，比如在一个字符串的任意位置插入一个变量或者让某个变量输出的时候保留n位小数，可以有以下几种方法：
-在字符串内插入变量 在字符串开头的引号前添加 f 或 F 。在这种字符串中，可以在 { 和 } 字符之间输入引用的变量，或字面值的 Python 表达式。
-name = &amp;#34;Bob&amp;#34; age = 25 print(f&amp;#39;My name is {name} and I am {age} years old.&amp;#39;) # 以上代码的运行结果如下： &amp;gt;&amp;gt; My name is Bob and I am 25 years old. 使用str.format()方法，这是一种较新的方法，提供了更多的灵活性。
-name = &amp;#34;Bob&amp;#34; age = 25 print(&amp;#39;My name is {} and I am {} years old.&amp;#39;.format(name, age)) print(&amp;#39;My name is {0} and I am {1} years old.</description>
+      <description>&lt;p&gt;Python常见格式化输出方法&lt;/p&gt;</description>
     </item>
     
   </channel>
