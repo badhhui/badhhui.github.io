@@ -103,16 +103,7 @@
       <pubDate>Fri, 30 Sep 2022 14:52:05 +0800</pubDate>
       
       <guid>https://blog.hhui.me/post/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</guid>
-      <description>初略计算Block及node size对F2FS元数据和文件索引所占空间的影响。</description>
-    </item>
-    
-    <item>
-      <title></title>
-      <link>https://blog.hhui.me/post/%E5%85%A5%E5%85%9A/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://blog.hhui.me/post/%E5%85%A5%E5%85%9A/</guid>
-      <description>从递交入党申请书以来，我就坚持学习党章与党史，在学四史的过程中，汲取信仰，坚定信念，武装思想，提高能力，加深了对党的认识和理解，不仅仅是通过理论学习，还有身边几位优秀党员的言传身教。此外，由于我的家乡江西是一块革命圣地，经历过南昌起义、井冈山会师等历史事件，我从小就接受了红色文化的熏陶，更加坚定了我励志加入中国共产党的崇高信仰。</description>
+      <description>初略计算Block及node size对F2FS元数据和文件索引所占空间的影响</description>
     </item>
     
   </channel>
