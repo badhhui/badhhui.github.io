@@ -8,21 +8,31 @@
     <language>zh-cn</language>
     <lastBuildDate>Fri, 15 Mar 2024 18:45:08 +0800</lastBuildDate><atom:link href="https://blog.hhui.me/index.xml" rel="self" type="application/rss+xml" />
     <item>
+      <title>Readme</title>
+      <link>https://blog.hhui.me/readme/</link>
+      <pubDate>Sun, 17 Mar 2024 16:48:19 +0800</pubDate>
+      
+      <guid>https://blog.hhui.me/readme/</guid>
+      <description>A graduate student at Chongqing University.
+Programming Language Java C++ C Python Javascript Research Interests Operating System Strorage System File System Data Deduplication </description>
+    </item>
+    
+    <item>
       <title>Python常见格式化输出方法</title>
       <link>https://blog.hhui.me/post/python%E5%B8%B8%E8%A7%81%E6%A0%BC%E5%BC%8F%E5%8C%96%E8%BE%93%E5%87%BA%E6%96%B9%E6%B3%95/</link>
       <pubDate>Fri, 15 Mar 2024 18:45:08 +0800</pubDate>
       
       <guid>https://blog.hhui.me/post/python%E5%B8%B8%E8%A7%81%E6%A0%BC%E5%BC%8F%E5%8C%96%E8%BE%93%E5%87%BA%E6%96%B9%E6%B3%95/</guid>
-      <description>&lt;p&gt;Python常见格式化输出方法&lt;/p&gt;</description>
+      <description>Python常见格式化输出方法</description>
     </item>
     
     <item>
-      <title>Leetcode_hot_100刷题记录</title>
+      <title>Leetcode_hot_100刷题记录(持续更新中)</title>
       <link>https://blog.hhui.me/post/leetcode_hot_100%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95/</link>
       <pubDate>Fri, 08 Mar 2024 21:46:49 +0800</pubDate>
       
       <guid>https://blog.hhui.me/post/leetcode_hot_100%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95/</guid>
-      <description>&lt;p&gt;记录刷leetcode hot 100的题目以及解题思路&lt;/p&gt;</description>
+      <description>记录刷leetcode hot 100的题目以及解题思路</description>
     </item>
     
     <item>
@@ -31,7 +41,7 @@
       <pubDate>Mon, 23 Oct 2023 10:59:27 +0800</pubDate>
       
       <guid>https://blog.hhui.me/post/%E4%BB%8Ef2fs%E7%9A%84io%E6%B5%81%E7%A8%8B%E4%B8%AD%E7%90%86%E8%A7%A3fscrypt/</guid>
-      <description>&lt;p&gt;本文以&lt;code&gt;F2FS&lt;/code&gt;的代码为切入点，通过几个通用的IO操作过程讲解&lt;code&gt;fscrypt&lt;/code&gt;的代码&lt;/p&gt;</description>
+      <description>本文以F2FS的代码为切入点，通过几个通用的IO操作过程讲解fscrypt的代码</description>
     </item>
     
     <item>
@@ -40,7 +50,7 @@
       <pubDate>Fri, 22 Sep 2023 20:15:43 +0800</pubDate>
       
       <guid>https://blog.hhui.me/post/mit_s6.081_lab3/</guid>
-      <description>&lt;p&gt;MIT s6.081课程笔记及实验&lt;/p&gt;</description>
+      <description>MIT s6.081课程笔记及实验</description>
     </item>
     
     <item>
@@ -49,7 +59,7 @@
       <pubDate>Wed, 20 Sep 2023 16:01:25 +0800</pubDate>
       
       <guid>https://blog.hhui.me/post/oh-my-zsh/</guid>
-      <description>&lt;p&gt;安装oh my zsh记录过程&lt;/p&gt;</description>
+      <description>安装oh my zsh记录过程</description>
     </item>
     
     <item>
@@ -58,7 +68,7 @@
       <pubDate>Sat, 16 Sep 2023 15:44:03 +0800</pubDate>
       
       <guid>https://blog.hhui.me/post/mit_s6.081_lab2/</guid>
-      <description>&lt;p&gt;MIT s6.081课程笔记及实验&lt;/p&gt;</description>
+      <description>MIT s6.081课程笔记及实验</description>
     </item>
     
     <item>
@@ -67,7 +77,7 @@
       <pubDate>Wed, 06 Sep 2023 14:36:19 +0800</pubDate>
       
       <guid>https://blog.hhui.me/post/mit_s6.081_lab1/</guid>
-      <description>&lt;p&gt;MIT s6.081课程笔记及实验&lt;/p&gt;</description>
+      <description>MIT s6.081课程笔记及实验</description>
     </item>
     
     <item>
@@ -76,7 +86,7 @@
       <pubDate>Fri, 14 Apr 2023 19:37:19 +0800</pubDate>
       
       <guid>https://blog.hhui.me/post/ebpf%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</guid>
-      <description>&lt;p&gt;eBPF学习笔记&lt;/p&gt;</description>
+      <description>eBPF学习笔记</description>
     </item>
     
     <item>
@@ -106,6 +116,15 @@ sudo cp 你解压的驱动的路径/BT5.0_Linux/20201202_LINUX_BT_DRIVER/usb/blu
     </item>
     
     <item>
+      <title>ELOFS</title>
+      <link>https://blog.hhui.me/post/elofs/</link>
+      <pubDate>Wed, 05 Oct 2022 23:46:09 +0800</pubDate>
+      
+      <guid>https://blog.hhui.me/post/elofs/</guid>
+      <description>最近读完了老师给我的LOFS文件系统，但由于这篇论文说的比较简略，我找到了它的详细版本，本文简要介绍一下我对这个ELOFS文件系统的理解</description>
+    </item>
+    
+    <item>
       <title>About</title>
       <link>https://blog.hhui.me/about/</link>
       <pubDate>Wed, 05 Oct 2022 13:57:22 +0800</pubDate>
@@ -120,7 +139,7 @@ sudo cp 你解压的驱动的路径/BT5.0_Linux/20201202_LINUX_BT_DRIVER/usb/blu
       <pubDate>Fri, 30 Sep 2022 15:04:21 +0800</pubDate>
       
       <guid>https://blog.hhui.me/post/f2fs/</guid>
-      <description>&lt;p&gt;F2FS是一个Linux文件系统，适用于闪存设备，论文的实验结果表明F2FS要比EXT4的性能好很多。&lt;/p&gt;</description>
+      <description>F2FS是一个Linux文件系统，适用于闪存设备，论文的实验结果表明F2FS要比EXT4的性能好很多。</description>
     </item>
     
     <item>
@@ -160,7 +179,7 @@ F2FS有前台清理和后台清理，前台清理只有在没有足够空闲部�
       <pubDate>Fri, 30 Sep 2022 14:52:05 +0800</pubDate>
       
       <guid>https://blog.hhui.me/post/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</guid>
-      <description>&lt;p&gt;初略计算Block及node size对F2FS元数据和文件索引所占空间的影响。&lt;/p&gt;</description>
+      <description>初略计算Block及node size对F2FS元数据和文件索引所占空间的影响。</description>
     </item>
     
     <item>

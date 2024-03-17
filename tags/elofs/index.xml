@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>ELOFS on Hhui&#39;s blog</title>
+    <link>https://blog.hhui.me/tags/elofs/</link>
+    <description>Recent content in ELOFS on Hhui&#39;s blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Wed, 05 Oct 2022 23:46:09 +0800</lastBuildDate><atom:link href="https://blog.hhui.me/tags/elofs/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>ELOFS</title>
+      <link>https://blog.hhui.me/post/elofs/</link>
+      <pubDate>Wed, 05 Oct 2022 23:46:09 +0800</pubDate>
+      
+      <guid>https://blog.hhui.me/post/elofs/</guid>
+      <description>最近读完了老师给我的LOFS文件系统，但由于这篇论文说的比较简略，我找到了它的详细版本，本文简要介绍一下我对这个ELOFS文件系统的理解</description>
+    </item>
+    
+  </channel>
+</rss>

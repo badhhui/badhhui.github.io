@@ -13,7 +13,7 @@
       <pubDate>Mon, 23 Oct 2023 10:59:27 +0800</pubDate>
       
       <guid>https://blog.hhui.me/post/%E4%BB%8Ef2fs%E7%9A%84io%E6%B5%81%E7%A8%8B%E4%B8%AD%E7%90%86%E8%A7%A3fscrypt/</guid>
-      <description>&lt;p&gt;本文以&lt;code&gt;F2FS&lt;/code&gt;的代码为切入点，通过几个通用的IO操作过程讲解&lt;code&gt;fscrypt&lt;/code&gt;的代码&lt;/p&gt;</description>
+      <description>本文以F2FS的代码为切入点，通过几个通用的IO操作过程讲解fscrypt的代码</description>
     </item>
     
   </channel>

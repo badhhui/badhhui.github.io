@@ -13,7 +13,7 @@
       <pubDate>Mon, 23 Oct 2023 10:59:27 +0800</pubDate>
       
       <guid>https://blog.hhui.me/post/%E4%BB%8Ef2fs%E7%9A%84io%E6%B5%81%E7%A8%8B%E4%B8%AD%E7%90%86%E8%A7%A3fscrypt/</guid>
-      <description>&lt;p&gt;本文以&lt;code&gt;F2FS&lt;/code&gt;的代码为切入点，通过几个通用的IO操作过程讲解&lt;code&gt;fscrypt&lt;/code&gt;的代码&lt;/p&gt;</description>
+      <description>本文以F2FS的代码为切入点，通过几个通用的IO操作过程讲解fscrypt的代码</description>
     </item>
     
     <item>
@@ -22,7 +22,7 @@
       <pubDate>Fri, 30 Sep 2022 15:04:21 +0800</pubDate>
       
       <guid>https://blog.hhui.me/post/f2fs/</guid>
-      <description>&lt;p&gt;F2FS是一个Linux文件系统，适用于闪存设备，论文的实验结果表明F2FS要比EXT4的性能好很多。&lt;/p&gt;</description>
+      <description>F2FS是一个Linux文件系统，适用于闪存设备，论文的实验结果表明F2FS要比EXT4的性能好很多。</description>
     </item>
     
     <item>
@@ -62,7 +62,7 @@ F2FS有前台清理和后台清理，前台清理只有在没有足够空闲部�
       <pubDate>Fri, 30 Sep 2022 14:52:05 +0800</pubDate>
       
       <guid>https://blog.hhui.me/post/block%E5%A4%A7%E5%B0%8F%E5%AF%B9f2fs%E7%9A%84%E5%BD%B1%E5%93%8D/</guid>
-      <description>&lt;p&gt;初略计算Block及node size对F2FS元数据和文件索引所占空间的影响。&lt;/p&gt;</description>
+      <description>初略计算Block及node size对F2FS元数据和文件索引所占空间的影响。</description>
     </item>
     
     <item>
